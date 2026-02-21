@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 
 import { Command } from "commander";
+import { runReview } from "./commands/review.js";
 
 const program = new Command();
 
@@ -13,9 +14,15 @@ program
   .command("review")
   .description("Review code in the given path")
   .argument("<path>", "path to review")
-  .action((path: string) => {
-    console.log(`codegoat review: not implemented yet (path: ${path})`);
-    process.exit(0);
+  .option("-p, --provider <name>", "LLM provider (default: openai)", undefined)
+  .option("-m, --model <name>", "model name", undefined)
+  .option("-b, --budget <tokens>", "max token budget", undefined)
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string }) => {
+    await runReview(path, {
+      provider: opts.provider,
+      model: opts.model,
+      budget: opts.budget ? parseInt(opts.budget, 10) : undefined,
+    });
   });
 
 program
