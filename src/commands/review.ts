@@ -151,7 +151,7 @@ function handleOutput(
 
   if (format === "json") {
     const jsonOut = {
-      version: "0.2.0",
+      version: "0.3.0",
       filesScanned: result.filesScanned,
       filesSkipped: result.filesSkipped,
       estimatedTokens: result.estimatedTokens,
