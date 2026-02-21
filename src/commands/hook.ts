@@ -34,7 +34,7 @@ fi
 HAS_SUPPORTED=false
 for f in $STAGED; do
   case "$f" in
-    *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.py|*.go|*.rb|*.java|*.rs|*.c|*.h|*.cpp|*.hpp|*.cc|*.php)
+    *.ts|*.tsx|*.js|*.jsx|*.mjs|*.cjs|*.py|*.go|*.rb|*.java|*.rs|*.c|*.h|*.cpp|*.hpp|*.cc|*.php|*.kt|*.swift|*.scala)
       HAS_SUPPORTED=true
       break
       ;;

@@ -88,6 +88,17 @@ const LANG_FRAMEWORKS: Record<string, TestFrameworkInfo[]> = {
     { name: "phpunit", testDir: "tests", testSuffix: "Test.php", importStyle: 'use PHPUnit\\Framework\\TestCase;' },
     { name: "pest", testDir: "tests", testSuffix: "Test.php", importStyle: "use function Pest\\test;" },
   ],
+  ".kt": [
+    { name: "junit5", testDir: "src/test/kotlin", testSuffix: "Test.kt", importStyle: "import org.junit.jupiter.api.Test\nimport org.junit.jupiter.api.Assertions.*" },
+    { name: "kotest", testDir: "src/test/kotlin", testSuffix: "Test.kt", importStyle: "import io.kotest.core.spec.style.StringSpec\nimport io.kotest.matchers.shouldBe" },
+  ],
+  ".swift": [
+    { name: "xctest", testDir: "Tests", testSuffix: "Tests.swift", importStyle: "import XCTest\n@testable import App" },
+  ],
+  ".scala": [
+    { name: "scalatest", testDir: "src/test/scala", testSuffix: "Spec.scala", importStyle: 'import org.scalatest.flatspec.AnyFlatSpec\nimport org.scalatest.matchers.should.Matchers' },
+    { name: "munit", testDir: "src/test/scala", testSuffix: "Suite.scala", importStyle: "import munit.FunSuite" },
+  ],
 };
 
 /** Detect framework from project files */

@@ -58,6 +58,30 @@ describe("language support", () => {
     assert.equal(files[0].path, "index.php");
   });
 
+  it("discovers Kotlin .kt files", async () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "cg-lang-"));
+    fs.writeFileSync(path.join(tmpDir, "Main.kt"), 'fun main() { println("hello") }\n');
+    const files = await discoverFiles(tmpDir);
+    assert.equal(files.length, 1);
+    assert.equal(files[0].path, "Main.kt");
+  });
+
+  it("discovers Swift .swift files", async () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "cg-lang-"));
+    fs.writeFileSync(path.join(tmpDir, "main.swift"), 'print("hello")\n');
+    const files = await discoverFiles(tmpDir);
+    assert.equal(files.length, 1);
+    assert.equal(files[0].path, "main.swift");
+  });
+
+  it("discovers Scala .scala files", async () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "cg-lang-"));
+    fs.writeFileSync(path.join(tmpDir, "Main.scala"), 'object Main extends App { println("hello") }\n');
+    const files = await discoverFiles(tmpDir);
+    assert.equal(files.length, 1);
+    assert.equal(files[0].path, "Main.scala");
+  });
+
   it("discovers mixed language projects", async () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "cg-lang-"));
     fs.writeFileSync(path.join(tmpDir, "app.ts"), "const x = 1;");
@@ -69,8 +93,11 @@ describe("language support", () => {
     fs.writeFileSync(path.join(tmpDir, "main.c"), "int main() {}");
     fs.writeFileSync(path.join(tmpDir, "lib.cpp"), "void foo() {}");
     fs.writeFileSync(path.join(tmpDir, "index.php"), "<?php echo 1;");
+    fs.writeFileSync(path.join(tmpDir, "Main.kt"), "fun main() {}");
+    fs.writeFileSync(path.join(tmpDir, "main.swift"), "print(1)");
+    fs.writeFileSync(path.join(tmpDir, "Main.scala"), "object Main");
     fs.writeFileSync(path.join(tmpDir, "data.csv"), "a,b,c"); // should be ignored
     const files = await discoverFiles(tmpDir);
-    assert.equal(files.length, 9);
+    assert.equal(files.length, 12);
   });
 });

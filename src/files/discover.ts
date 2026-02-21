@@ -26,6 +26,9 @@ const SUPPORTED_EXTENSIONS = new Set([
   ".hpp",
   ".cc",
   ".php",
+  ".kt",
+  ".swift",
+  ".scala",
 ]);
 
 const SKIP_DIRS = new Set(["node_modules", "dist", ".git"]);

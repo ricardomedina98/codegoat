@@ -34,7 +34,8 @@ describe("generateHookScript", () => {
     assert.ok(script.includes("*.ts|"));
     assert.ok(script.includes("*.py|"));
     assert.ok(script.includes("*.go|"));
-    assert.ok(script.includes("*.php)"));
+    assert.ok(script.includes("*.php|"));
+    assert.ok(script.includes("*.scala)"));
   });
 });
 
