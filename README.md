@@ -252,7 +252,7 @@ vendor/
 
 ## Supported Languages
 
-TypeScript · JavaScript · Python · Go · Ruby · Java · Rust
+TypeScript · JavaScript · Python · Go · Ruby · Java · Rust · C · C++ · PHP
 
 More coming based on demand — [request yours](../../issues).
 
@@ -296,7 +296,7 @@ Good first contributions:
 - [x] Unit test generation (12 frameworks auto-detected)
 - [x] Documentation generation
 - [x] 4 LLM providers (OpenAI, Anthropic, Gemini, Ollama)
-- [x] 8 languages (JS/TS, Python, Go, Ruby, Java, Rust)
+- [x] 11 languages (JS/TS, Python, Go, Ruby, Java, Rust, C, C++, PHP)
 - [x] GitHub Actions + GitLab CI + Bitbucket Pipelines with inline comments
 - [x] Caching + watch mode
 - [x] Monorepo support (path-scoped configs)

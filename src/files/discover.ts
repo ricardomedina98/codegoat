@@ -20,6 +20,12 @@ const SUPPORTED_EXTENSIONS = new Set([
   ".rb",
   ".java",
   ".rs",
+  ".c",
+  ".h",
+  ".cpp",
+  ".hpp",
+  ".cc",
+  ".php",
 ]);
 
 const SKIP_DIRS = new Set(["node_modules", "dist", ".git"]);

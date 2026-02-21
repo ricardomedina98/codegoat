@@ -33,6 +33,31 @@ describe("language support", () => {
     assert.equal(files[0].path, "main.rs");
   });
 
+  it("discovers C .c and .h files", async () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "cg-lang-"));
+    fs.writeFileSync(path.join(tmpDir, "main.c"), '#include <stdio.h>\nint main() { return 0; }\n');
+    fs.writeFileSync(path.join(tmpDir, "utils.h"), '#ifndef UTILS_H\n#define UTILS_H\nvoid foo();\n#endif\n');
+    const files = await discoverFiles(tmpDir);
+    assert.equal(files.length, 2);
+  });
+
+  it("discovers C++ .cpp, .hpp, and .cc files", async () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "cg-lang-"));
+    fs.writeFileSync(path.join(tmpDir, "main.cpp"), '#include <iostream>\nint main() { return 0; }\n');
+    fs.writeFileSync(path.join(tmpDir, "utils.hpp"), '#pragma once\nvoid foo();\n');
+    fs.writeFileSync(path.join(tmpDir, "lib.cc"), 'void bar() {}\n');
+    const files = await discoverFiles(tmpDir);
+    assert.equal(files.length, 3);
+  });
+
+  it("discovers PHP .php files", async () => {
+    tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "cg-lang-"));
+    fs.writeFileSync(path.join(tmpDir, "index.php"), '<?php\necho "hello";\n');
+    const files = await discoverFiles(tmpDir);
+    assert.equal(files.length, 1);
+    assert.equal(files[0].path, "index.php");
+  });
+
   it("discovers mixed language projects", async () => {
     tmpDir = fs.mkdtempSync(path.join(os.tmpdir(), "cg-lang-"));
     fs.writeFileSync(path.join(tmpDir, "app.ts"), "const x = 1;");
@@ -41,8 +66,11 @@ describe("language support", () => {
     fs.writeFileSync(path.join(tmpDir, "app.rb"), "x = 1");
     fs.writeFileSync(path.join(tmpDir, "App.java"), "class App {}");
     fs.writeFileSync(path.join(tmpDir, "main.rs"), "fn main() {}");
+    fs.writeFileSync(path.join(tmpDir, "main.c"), "int main() {}");
+    fs.writeFileSync(path.join(tmpDir, "lib.cpp"), "void foo() {}");
+    fs.writeFileSync(path.join(tmpDir, "index.php"), "<?php echo 1;");
     fs.writeFileSync(path.join(tmpDir, "data.csv"), "a,b,c"); // should be ignored
     const files = await discoverFiles(tmpDir);
-    assert.equal(files.length, 6);
+    assert.equal(files.length, 9);
   });
 });

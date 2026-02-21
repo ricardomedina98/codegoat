@@ -67,6 +67,27 @@ const LANG_FRAMEWORKS: Record<string, TestFrameworkInfo[]> = {
   ".rs": [
     { name: "cargo-test", testDir: "", testSuffix: "", importStyle: "#[cfg(test)] mod tests { use super::*; #[test] fn test_foo() {} }" },
   ],
+  ".c": [
+    { name: "cunit", testDir: "test", testSuffix: "_test.c", importStyle: '#include <CUnit/CUnit.h>\n#include <CUnit/Basic.h>' },
+    { name: "cmocka", testDir: "test", testSuffix: "_test.c", importStyle: '#include <stdarg.h>\n#include <setjmp.h>\n#include <cmocka.h>' },
+  ],
+  ".h": [
+    { name: "cunit", testDir: "test", testSuffix: "_test.c", importStyle: '#include <CUnit/CUnit.h>\n#include <CUnit/Basic.h>' },
+  ],
+  ".cpp": [
+    { name: "gtest", testDir: "test", testSuffix: "_test.cpp", importStyle: '#include <gtest/gtest.h>' },
+    { name: "catch2", testDir: "test", testSuffix: "_test.cpp", importStyle: '#include <catch2/catch_test_macros.hpp>' },
+  ],
+  ".hpp": [
+    { name: "gtest", testDir: "test", testSuffix: "_test.cpp", importStyle: '#include <gtest/gtest.h>' },
+  ],
+  ".cc": [
+    { name: "gtest", testDir: "test", testSuffix: "_test.cc", importStyle: '#include <gtest/gtest.h>' },
+  ],
+  ".php": [
+    { name: "phpunit", testDir: "tests", testSuffix: "Test.php", importStyle: 'use PHPUnit\\Framework\\TestCase;' },
+    { name: "pest", testDir: "tests", testSuffix: "Test.php", importStyle: "use function Pest\\test;" },
+  ],
 };
 
 /** Detect framework from project files */
@@ -109,6 +130,28 @@ export function detectFramework(rootDir: string, ext: string): TestFrameworkInfo
     }
   }
 
+  // Check for PHPUnit/Pest
+  if (ext === ".php") {
+    try {
+      const composer = JSON.parse(fs.readFileSync(path.join(rootDir, "composer.json"), "utf-8"));
+      const allDeps = { ...composer.require, ...composer["require-dev"] };
+      if (allDeps["pestphp/pest"]) return candidates.find(c => c.name === "pest")!;
+    } catch {}
+    if (fs.existsSync(path.join(rootDir, "phpunit.xml")) || fs.existsSync(path.join(rootDir, "phpunit.xml.dist"))) {
+      return candidates.find(c => c.name === "phpunit")!;
+    }
+  }
+
+  // Check for CMake/GTest for C++
+  if (ext === ".cpp" || ext === ".cc" || ext === ".hpp") {
+    if (fs.existsSync(path.join(rootDir, "CMakeLists.txt"))) {
+      try {
+        const cmake = fs.readFileSync(path.join(rootDir, "CMakeLists.txt"), "utf-8");
+        if (cmake.includes("Catch2")) return candidates.find(c => c.name === "catch2") ?? candidates[0];
+      } catch {}
+    }
+  }
+
   // Check for JUnit 5 vs 4
   if (ext === ".java") {
     if (fs.existsSync(path.join(rootDir, "build.gradle")) || fs.existsSync(path.join(rootDir, "build.gradle.kts"))) {
@@ -145,6 +188,20 @@ export function mapTestPath(sourceFile: string, framework: TestFrameworkInfo, ro
   if (ext === ".java") {
     const javaPath = rel.replace(/^src\/main\/java\//, "");
     return path.join(rootDir, framework.testDir, path.dirname(javaPath), parsed.name + framework.testSuffix);
+  }
+
+  // PHP: tests/FooTest.php (PascalCase convention)
+  if (ext === ".php") {
+    const stripped = rel.replace(/^src\//, "");
+    const dir = path.dirname(stripped);
+    return path.join(rootDir, framework.testDir, dir, parsed.name + framework.testSuffix);
+  }
+
+  // C/C++: test/name_test.c(pp)
+  if ([".c", ".h", ".cpp", ".hpp", ".cc"].includes(ext)) {
+    const stripped = rel.replace(/^src\//, "");
+    const dir = path.dirname(stripped);
+    return path.join(rootDir, framework.testDir, dir, parsed.name + framework.testSuffix);
   }
 
   // JS/TS/Python/Ruby: testDir/name.test.ext

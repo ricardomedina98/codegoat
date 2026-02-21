@@ -18,7 +18,7 @@ export interface DiffResult {
 }
 
 const SUPPORTED_EXTENSIONS = new Set([
-  ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".py", ".go", ".rb", ".java", ".rs",
+  ".ts", ".tsx", ".js", ".jsx", ".mjs", ".cjs", ".py", ".go", ".rb", ".java", ".rs", ".c", ".h", ".cpp", ".hpp", ".cc", ".php",
 ]);
 
 const MAX_CONTEXT_LINES = 50;
