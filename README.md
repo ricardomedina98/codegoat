@@ -80,6 +80,28 @@ CODEGOAT_OLLAMA_URL=http://192.168.1.100:11434 codegoat review . --provider olla
 
 Default model: `codellama`. Works with any model Ollama supports.
 
+## Configuration File
+
+Create a `.codegoatrc` in your project or home directory:
+
+```bash
+codegoat init
+```
+
+This generates a starter config:
+
+```json
+{
+  "provider": "openai",
+  "model": "gpt-4o-mini",
+  "budget": 100000
+}
+```
+
+All options: `provider`, `model`, `budget`, `format`, `ollamaUrl`.
+
+**Precedence:** CLI flags > env vars > `.codegoatrc` (project) > `~/.codegoatrc` (home)
+
 ## Environment Variables
 
 | Variable | Description |
