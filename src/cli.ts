@@ -3,6 +3,7 @@
 import fs from "node:fs";
 import { Command } from "commander";
 import { runReview } from "./commands/review.js";
+import { runWatch } from "./commands/watch.js";
 import { runDocs } from "./commands/docs.js";
 import { loadConfig, applyConfig, generateStarterConfig } from "./config.js";
 
@@ -27,11 +28,22 @@ program
   .option("-s, --severity <level>", "minimum severity to show: critical, warning, info, style", "info")
   .option("--fail-on <level>", "exit 1 if findings at this severity or above (none to disable)", "critical")
   .option("--no-ignore", "skip .codegoatignore file")
+  .option("-w, --watch", "watch for file changes and re-review incrementally")
   .option("--no-color", "disable color output")
-  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; ignore?: boolean; color?: boolean }) => {
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; ignore?: boolean; watch?: boolean; color?: boolean }) => {
     applyConfig(opts, config);
-    const format = opts.format ?? config.format ?? "markdown";
     const rules = config.rules?.filter((r: string) => !r.startsWith("//"));
+    if (opts.watch) {
+      await runWatch(path, {
+        provider: opts.provider,
+        model: opts.model,
+        severity: opts.severity,
+        rules,
+        noIgnore: opts.ignore === false,
+      });
+      return;
+    }
+    const format = opts.format ?? config.format ?? "markdown";
     await runReview(path, {
       provider: opts.provider,
       model: opts.model,
