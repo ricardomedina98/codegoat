@@ -1,5 +1,21 @@
 # Changelog
 
+## [1.2.0] - 2026-02-21
+
+### Added
+
+- **`codegoat fix` command** — AI-powered autofix for review findings
+  - Two-phase workflow: review first, then generate targeted fixes per finding
+  - **Interactive mode** (default): shows finding → proposed diff → accept/skip/quit
+  - `--apply` flag: auto-apply all fixes without prompting
+  - `--dry-run` flag: preview fixes without writing to disk
+  - **Git stash safety**: auto-stashes uncommitted changes before interactive fixes
+  - 30-line context window around each finding for precise LLM fix generation
+  - Minimal-change instructions — fixes the issue without rewriting surrounding code
+  - Lazy fix generation — only calls LLM when user doesn't skip
+  - JSON output (`--format json`) for VS Code extension integration
+  - 10 new tests (183 total, all passing)
+
 ## [1.1.0] - 2026-02-21
 
 ### Added
