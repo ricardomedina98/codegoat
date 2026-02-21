@@ -1,78 +1,55 @@
 # 🐐 codegoat
 
-[![v1.0.0](https://img.shields.io/badge/version-1.0.0-brightgreen)](https://github.com/ricardomedina98/codegoat/releases/tag/v1.0.0) [![Tests](https://img.shields.io/badge/tests-168%20passing-brightgreen)]() [![License: MIT](https://img.shields.io/badge/license-MIT-blue)]()
+[![npm version](https://img.shields.io/npm/v/codegoat.svg)](https://www.npmjs.com/package/codegoat)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![GitHub stars](https://img.shields.io/github/stars/opengoat/codegoat.svg)](https://github.com/opengoat/codegoat/stargazers)
 
-**AI-powered code review for developers who ship fast.** Free, open source, runs on your machine.
+**AI-powered code review from your terminal.** Free, open source, runs locally.
 
 ```bash
 npx codegoat review .
 ```
 
-That's it. No account, no subscription, no sending your code to a third party.
+No account. No subscription. No sending your code to a third party.
 
 ---
 
 ## Why codegoat?
 
-Every AI code review tool wants $20-30/developer/month and requires sending your code to their servers. We think that's backwards.
+Every AI code review tool charges $20-30/developer/month and requires your code to pass through their servers.
 
 | | CodeRabbit | Sourcery | Copilot CR | **codegoat** |
 |---|---|---|---|---|
-| **Cost** | $30/seat/mo | $24/dev/mo | $10-39/mo | **Free** |
-| **Open source** | ❌ | ❌ | ❌ | **✅ MIT** |
-| **CLI for local review** | ❌ | ❌ | ❌ | **✅** |
+| **Cost** | $30/seat/mo | $24/dev/mo | $10-39/mo | **Free (MIT)** |
+| **Open source** | ❌ | ❌ | ❌ | **✅** |
+| **CLI** | ❌ | ❌ | ❌ | **✅** |
 | **Choose your LLM** | ❌ | ❌ | ❌ | **✅** |
 | **Code stays local** | ❌ | ❌ | ❌ | **✅** |
 
-**The math:** A team of 5 pays ~$150/month for CodeRabbit. With codegoat + GPT-4o-mini, the same team pays **~$3/month** in API costs. That's 50x cheaper.
+**The math:** A team of 5 pays ~$150/month for CodeRabbit. With codegoat + gpt-4o-mini, the same team pays **~$3/month** in API costs.
 
 ### What makes codegoat different
 
-- 🆓 **Free forever** — MIT licensed. No seat fees, no subscriptions, no "free tier limits."
-- 🔑 **Bring your own LLM** — OpenAI, Anthropic, or local models via Ollama. Switch anytime.
-- 🖥️ **CLI-first** — Review code before you push, not after. Works in your terminal, your scripts, your CI.
-- 🔒 **Your code stays yours** — Runs on your machine. With Ollama, nothing leaves your network.
-- 🤖 **GitHub Action included** — Automated PR reviews without SaaS dependencies.
-- ⚡ **Zero config** — One command. One env var. Done.
+- 🆓 **Free forever** — MIT licensed. No seat fees, no "upgrade to Pro."
+- 🔑 **Bring your own LLM** — OpenAI, Anthropic, or local models via Ollama.
+- 🖥️ **CLI-first** — Review code before you push. Works in your terminal, scripts, and CI.
+- 🔒 **Your code stays yours** — With a local LLM, nothing leaves your network.
+- 🤖 **CI-ready** — GitHub Actions + GitLab CI with inline PR/MR comments.
+- ⚡ **Fast** — Caching means unchanged files are instant on repeat reviews.
 
 ---
 
-## Getting Started (60 seconds)
-
-### 1. Get an API key
-
-Grab one from [OpenAI](https://platform.openai.com/api-keys), [Anthropic](https://console.anthropic.com/), or use [Ollama](https://ollama.ai) for free local models.
+## Quick Start
 
 ```bash
+# 1. Set your API key
 export CODEGOAT_API_KEY=sk-...
-```
 
-### 2. Run your first review
-
-```bash
-# Review current directory
+# 2. Review your code
 npx codegoat review .
-
-# Review a specific folder
-npx codegoat review ./src
-
-# Use Claude instead of GPT
-npx codegoat review . --provider anthropic
-
-# Use a local model (no API key needed!)
-npx codegoat review . --provider ollama
 ```
 
-### 3. That's it
-
-No install needed (`npx` runs it directly). No account. No config file required.
-
-Want to install globally?
-
-```bash
-npm install -g codegoat
-codegoat review .
-```
+That's it. No install needed. [More setup options →](docs/quick-start.md)
 
 ---
 
@@ -80,160 +57,92 @@ codegoat review .
 
 | Command | Description |
 |---------|-------------|
-| `codegoat review <path>` | Review code at the given path |
-| `codegoat review . --diff` | Review only changed files from git diff |
+| `codegoat review <path>` | Review code with severity-rated findings |
+| `codegoat review --diff [ref]` | Review only changed files |
+| `codegoat review --watch` | Watch mode — review on save |
 | `codegoat docs <path>` | Generate documentation |
-| `codegoat init` | Generate a starter `.codegoatrc` config |
-
-## CLI Options
-
-### `codegoat review`
-
-| Flag | Description | Default |
-|------|-------------|---------|
-| `-p, --provider <name>` | LLM provider | `openai` |
-| `-m, --model <name>` | Model name | `gpt-4o-mini` |
-| `-b, --budget <tokens>` | Max token budget | `100000` |
-| `-f, --format <type>` | Output: `markdown` or `json` | `markdown` |
-| `-d, --diff [ref]` | Review only changed files | — |
-| `--no-color` | Disable color output | auto-detect |
-
-### `codegoat docs`
-
-| Flag | Description | Default |
-|------|-------------|---------|
-| `-l, --level <level>` | `project`, `file`, or `function` | `project` |
+| `codegoat cache status` | View cache statistics |
+| `codegoat cache clear` | Clear cached reviews |
+| `codegoat init` | Generate `.codegoatrc` config |
 
 ---
 
-## Usage Examples
-
-### Review your project
+## Example Output
 
 ```bash
 $ codegoat review ./src
+```
+
+```
+🐐 codegoat review — src/
+
+12 files reviewed · 🔴 2 critical · 🟡 3 warnings · 🔵 2 info
 
 ### src/routes/auth.ts
-- **Security (line 42):** Password comparison uses `===` — vulnerable to timing attacks.
-- **Style (line 67):** `generateToken()` hardcodes expiry. Make configurable.
+🔴 critical — Line 42: Password comparison uses === instead of
+   crypto.timingSafeEqual(). Vulnerable to timing attacks.
 
-### src/middleware/rateLimit.ts
-- **Bug (line 15):** Rate limit counter resets on restart (in-memory store).
+🔴 critical — Line 8: JWT secret hardcoded as string literal.
+   Move to environment variable.
 
-3 issues found: 1 bug, 1 security, 1 style
+### src/services/payment.ts
+🟡 warning — Line 89: No error handling for network timeout.
+   gateway.charge() can hang indefinitely.
+
+### src/utils/validate.ts
+🔵 info — Email regex is overly permissive. Consider zod.
+
+Score: 5/10
 ```
 
-### Review only your changes
-
-```bash
-# Staged changes
-$ codegoat review . --diff
-
-# Changes vs main branch
-$ codegoat review . --diff main
-
-# Last 3 commits
-$ codegoat review . --diff HEAD~3..HEAD
-```
-
-### Generate documentation
-
-```bash
-# Project overview
-$ codegoat docs .
-
-# Per-file documentation
-$ codegoat docs . --level file
-
-# JSDoc/TSDoc comments
-$ codegoat docs . --level function
-```
-
-### JSON output for CI
-
-```bash
-$ codegoat review . --format json | jq .
-```
+[More examples →](docs/examples.md) · [Demo repo with intentional bugs →](https://github.com/ricardomedina98/codegoat-demo)
 
 ---
 
 ## Providers
 
-### OpenAI (default)
+| Provider | Setup | Cost/review | Privacy |
+|----------|-------|-------------|---------|
+| **OpenAI** (default) | `CODEGOAT_API_KEY=sk-...` | ~$0.01 | Cloud |
+| **Anthropic** | `--provider anthropic` | ~$0.005 | Cloud |
+| **Ollama** (local) | `--provider ollama` | $0 | **Fully local** |
 
 ```bash
-export CODEGOAT_API_KEY=sk-...
-codegoat review .
+# Use Claude
+codegoat review . --provider anthropic --model claude-sonnet-4-20250514
+
+# Use a local model (no API key needed)
+codegoat review . --provider ollama --model codellama
 ```
 
-### Anthropic Claude
+[Provider setup guide →](docs/providers.md)
+
+---
+
+## Severity Levels
+
+| Level | Emoji | Meaning |
+|-------|-------|---------|
+| critical | 🔴 | Bugs, security vulnerabilities, crashes |
+| warning | 🟡 | Likely problems, missing error handling |
+| info | 🔵 | Suggestions, refactoring opportunities |
+| style | ⚪ | Cosmetic, naming conventions |
 
 ```bash
-export CODEGOAT_API_KEY=sk-ant-...
-codegoat review . --provider anthropic
-```
+# Show only critical + warning
+codegoat review . --severity warning
 
-Default model: `claude-3-haiku-20240307`. Override with `--model claude-sonnet-4-20250514`.
-
-### Ollama (local, free)
-
-```bash
-# Install Ollama: https://ollama.ai
-ollama pull codellama
-
-# No API key needed!
-codegoat review . --provider ollama
-
-# Custom model
-codegoat review . --provider ollama --model deepseek-coder
-
-# Custom Ollama URL (default: http://localhost:11434)
-CODEGOAT_OLLAMA_URL=http://192.168.1.100:11434 codegoat review . --provider ollama
+# CI: fail on critical findings
+codegoat review . --fail-on critical
 ```
 
 ---
 
-## Configuration File
+## CI Integration
 
-Create a `.codegoatrc` in your project or home directory:
-
-```bash
-codegoat init
-```
-
-This generates a starter config:
-
-```json
-{
-  "provider": "openai",
-  "model": "gpt-4o-mini",
-  "budget": 100000
-}
-```
-
-All options: `provider`, `model`, `budget`, `format`, `ollamaUrl`.
-
-**Precedence:** CLI flags > env vars > `.codegoatrc` (project) > `~/.codegoatrc` (home)
-
-## Environment Variables
-
-| Variable | Description |
-|----------|-------------|
-| `CODEGOAT_API_KEY` | **Required** (except Ollama). Your LLM provider API key |
-| `CODEGOAT_PROVIDER` | LLM provider (`openai`, `anthropic`, `ollama`) |
-| `CODEGOAT_MODEL` | Model name |
-| `CODEGOAT_MAX_TOKENS` | Token budget for file content |
-| `CODEGOAT_OLLAMA_URL` | Ollama endpoint (default: `http://localhost:11434`) |
-| `NO_COLOR` | Disable color output (any value) |
-
----
-
-## GitHub Action
-
-Automated PR reviews in 30 seconds:
+### GitHub Actions
 
 ```yaml
-# .github/workflows/codegoat.yml
 name: Code Review
 on:
   pull_request:
@@ -249,55 +158,120 @@ jobs:
       - uses: actions/checkout@v4
         with:
           fetch-depth: 0
-      - uses: ricardomedina98/codegoat@main
+      - uses: opengoat/codegoat@v1
         with:
           api-key: ${{ secrets.OPENAI_API_KEY }}
 ```
 
-The action auto-uses `--diff` mode on PRs for faster, cheaper, more focused reviews.
+Posts inline comments on the exact lines of your PR. One notification, all findings grouped.
 
-### Action Inputs
+### GitLab CI
 
-| Input | Required | Default | Description |
-|-------|----------|---------|-------------|
-| `api-key` | Yes | — | LLM API key |
-| `provider` | No | `openai` | LLM provider |
-| `model` | No | `gpt-4o-mini` | Model name |
-| `budget` | No | `100000` | Token budget |
-| `github-token` | No | `${{ github.token }}` | For PR comments |
+```yaml
+codegoat-review:
+  stage: test
+  image: node:20-alpine
+  rules:
+    - if: $CI_PIPELINE_SOURCE == "merge_request_event"
+  script:
+    - npx codegoat review --diff --ci
+  variables:
+    CODEGOAT_API_KEY: $CODEGOAT_API_KEY
+```
+
+[Full CI/CD guide →](docs/ci-cd.md)
+
+---
+
+## Configuration
+
+### `.codegoatrc` — project rules
+
+```yaml
+provider: anthropic
+model: claude-sonnet-4-20250514
+severity: info
+fail-on: critical
+
+rules:
+  - "All SQL queries must use parameterized statements"
+  - "Never use console.log — use the Logger service"
+  - "[critical] Never commit API keys or secrets"
+
+context: |
+  NestJS API with PostgreSQL. Money values in cents.
+```
+
+### `.codegoatignore` — exclude files
+
+```gitignore
+migrations/
+vendor/
+*.generated.ts
+```
+
+[Configuration guide →](docs/configuration.md)
 
 ---
 
 ## Supported Languages
 
-- **TypeScript / JavaScript:** `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`
-- **Python:** `.py`
-- **Go:** `.go`
-- **Ruby:** `.rb`
-- **Java:** `.java`
-- **Rust:** `.rs`
+TypeScript · JavaScript · Python · Go · Ruby · Java · Rust
 
-More coming based on demand — [open an issue](../../issues) to request yours.
+More coming based on demand — [request yours](../../issues).
 
-## Roadmap
+---
 
-- [x] Full repo review
-- [x] OpenAI + Anthropic + Ollama providers
-- [x] GitHub Action (with auto-diff on PRs)
-- [x] JSON output for CI
-- [x] PR/diff review mode (`--diff`)
-- [x] Documentation generation (`docs` command)
-- [x] `.codegoatrc` config file
-- [ ] Inline PR comments via GitHub Reviews API
-- [ ] Custom review rules / prompt overrides
-- [ ] More languages (Python, Go, Rust...)
-- [ ] `.codegoatignore` for excluding files
+## CLI Reference
+
+| Flag | Description | Default |
+|------|-------------|---------|
+| `-p, --provider` | LLM provider | `openai` |
+| `-m, --model` | Model name | `gpt-4o-mini` |
+| `-b, --budget` | Token budget | `100000` |
+| `-f, --format` | Output: `markdown` / `json` | `markdown` |
+| `-s, --severity` | Severity threshold | `info` |
+| `--fail-on` | CI failure threshold | `critical` |
+| `--diff [ref]` | Review changed files only | — |
+| `--watch` | Watch mode | — |
+| `--ci` | Auto-detect CI + post comments | — |
+| `--no-cache` | Skip cache | — |
+| `--no-ignore` | Skip .codegoatignore | — |
+
+---
 
 ## Contributing
 
-We'd love your help! See [CONTRIBUTING.md](CONTRIBUTING.md) for how to get started.
+We'd love your help! See [CONTRIBUTING.md](CONTRIBUTING.md).
 
-Whether it's adding a new language, fixing a bug, improving prompts, or just fixing a typo — all contributions are welcome. 🐐
+Good first contributions:
+- 🌍 Add a language
+- 📝 Improve review prompts
+- 🐛 Fix a bug
+- 📖 Improve docs
+
+---
+
+## Roadmap
+
+### Shipped ✅
+- [x] Full repo + diff review
+- [x] 3 LLM providers (OpenAI, Anthropic, Ollama)
+- [x] 8 languages
+- [x] Severity system + CI fail conditions
+- [x] GitHub Actions + GitLab CI with inline comments
+- [x] Documentation generation
+- [x] Caching + watch mode
+- [x] Configuration (.codegoatrc, .codegoatignore)
+
+### Coming next 🔜
+- [ ] Bitbucket Pipelines integration
+- [ ] Monorepo support (path-scoped configs)
+- [ ] Suggested code fixes (GitHub suggestion blocks)
+- [ ] More languages (C#, PHP, Kotlin, Swift...)
+- [ ] VS Code extension
+
+---
 
 ## License
 
