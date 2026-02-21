@@ -3,16 +3,24 @@ import { OpenAIProvider } from "./openai.js";
 import { AnthropicProvider } from "./anthropic.js";
 import { OllamaProvider } from "./ollama.js";
 import { GeminiProvider } from "./gemini.js";
+import { AzureOpenAIProvider } from "./azure.js";
+import { BedrockProvider } from "./bedrock.js";
 
-export function createProvider(name?: string): LLMProvider {
+export function createProvider(name?: string, model?: string): LLMProvider {
   const providerName = name ?? process.env.CODEGOAT_PROVIDER ?? "openai";
 
-  // Ollama and Gemini don't need CODEGOAT_API_KEY (Gemini uses GOOGLE_API_KEY)
+  // Providers with their own auth (no CODEGOAT_API_KEY needed)
   if (providerName === "ollama") {
     return new OllamaProvider();
   }
   if (providerName === "gemini") {
     return new GeminiProvider();
+  }
+  if (providerName === "azure") {
+    return new AzureOpenAIProvider(model);
+  }
+  if (providerName === "bedrock") {
+    return new BedrockProvider(model);
   }
 
   if (!process.env.CODEGOAT_API_KEY) {
@@ -30,7 +38,7 @@ export function createProvider(name?: string): LLMProvider {
       return new AnthropicProvider();
     default:
       throw new Error(
-        `Unknown provider "${providerName}". Supported providers: openai, anthropic, ollama, gemini`
+        `Unknown provider "${providerName}". Supported providers: openai, anthropic, ollama, gemini, azure, bedrock`
       );
   }
 }

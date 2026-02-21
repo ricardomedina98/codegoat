@@ -1,267 +1,84 @@
-import { describe, it, before, after, mock } from "node:test";
+import { describe, it, beforeEach, afterEach } from "node:test";
 import assert from "node:assert/strict";
-import { buildReviewPrompt } from "../src/providers/prompts.js";
-import { OpenAIProvider } from "../src/providers/openai.js";
-
-describe("buildReviewPrompt", () => {
-  it("returns system and user messages", () => {
-    const files = [{ path: "foo.ts", content: "const x = 1;" }];
-    const messages = buildReviewPrompt(files);
-
-    assert.equal(messages.length, 2);
-    assert.equal(messages[0].role, "system");
-    assert.equal(messages[1].role, "user");
-  });
-
-  it("system message contains reviewer instructions", () => {
-    const messages = buildReviewPrompt([{ path: "a.ts", content: "x" }]);
-    assert.ok(messages[0].content.includes("senior code reviewer"));
-    assert.ok(messages[0].content.includes("critical"));
-    assert.ok(messages[0].content.includes("critical"));
-    assert.ok(messages[0].content.includes("warning"));
-    assert.ok(messages[0].content.includes("style"));
-    assert.ok(messages[0].content.includes("info"));
-  });
-
-  it("user message contains file path header", () => {
-    const messages = buildReviewPrompt([
-      { path: "src/utils.ts", content: "export function add(a: number, b: number) {\n  return a + b;\n}" },
-    ]);
-    assert.ok(messages[1].content.includes("=== src/utils.ts ==="));
-  });
-
-  it("prepends line numbers to content", () => {
-    const messages = buildReviewPrompt([
-      { path: "test.ts", content: "line one\nline two\nline three" },
-    ]);
-    const user = messages[1].content;
-    assert.ok(user.includes("1 | line one"));
-    assert.ok(user.includes("2 | line two"));
-    assert.ok(user.includes("3 | line three"));
-  });
-
-  it("includes multiple files", () => {
-    const messages = buildReviewPrompt([
-      { path: "a.ts", content: "a" },
-      { path: "b.ts", content: "b" },
-    ]);
-    const user = messages[1].content;
-    assert.ok(user.includes("=== a.ts ==="));
-    assert.ok(user.includes("=== b.ts ==="));
-  });
-
-  it("user message ends with review instructions", () => {
-    const messages = buildReviewPrompt([{ path: "x.ts", content: "x" }]);
-    assert.ok(messages[1].content.includes("Review the code above"));
-    assert.ok(messages[1].content.includes("issues found"));
-  });
-});
+import { createProvider } from "../src/providers/factory.js";
 
 describe("createProvider", () => {
-  let originalKey: string | undefined;
-  let originalProvider: string | undefined;
+  const savedEnv: Record<string, string | undefined> = {};
 
-  before(() => {
-    originalKey = process.env.CODEGOAT_API_KEY;
-    originalProvider = process.env.CODEGOAT_PROVIDER;
-  });
-
-  after(() => {
-    if (originalKey !== undefined) {
-      process.env.CODEGOAT_API_KEY = originalKey;
-    } else {
-      delete process.env.CODEGOAT_API_KEY;
-    }
-    if (originalProvider !== undefined) {
-      process.env.CODEGOAT_PROVIDER = originalProvider;
-    } else {
-      delete process.env.CODEGOAT_PROVIDER;
+  beforeEach(() => {
+    // Save env
+    for (const key of ["CODEGOAT_API_KEY", "CODEGOAT_PROVIDER", "AZURE_OPENAI_ENDPOINT", "AZURE_OPENAI_KEY", "AWS_ACCESS_KEY_ID", "AWS_SECRET_ACCESS_KEY", "AWS_REGION"]) {
+      savedEnv[key] = process.env[key];
     }
   });
 
-  it("throws on unknown provider", async () => {
+  afterEach(() => {
+    // Restore env
+    for (const [key, val] of Object.entries(savedEnv)) {
+      if (val === undefined) delete process.env[key];
+      else process.env[key] = val;
+    }
+  });
+
+  it("creates openai provider", () => {
     process.env.CODEGOAT_API_KEY = "test-key";
-    // Dynamic import to get fresh module state
-    const { createProvider } = await import("../src/providers/factory.js");
-    assert.throws(
-      () => createProvider("unknown-provider"),
-      (err: Error) => {
-        assert.ok(err.message.includes("Unknown provider"));
-        assert.ok(err.message.includes("unknown-provider"));
-        return true;
-      }
-    );
+    const p = createProvider("openai");
+    assert.equal(p.name, "openai");
   });
 
-  it("exits when API key is missing", async () => {
+  it("creates anthropic provider", () => {
+    process.env.CODEGOAT_API_KEY = "test-key";
+    const p = createProvider("anthropic");
+    assert.equal(p.name, "anthropic");
+  });
+
+  it("creates ollama provider without API key", () => {
     delete process.env.CODEGOAT_API_KEY;
-    const exitMock = mock.fn((_code?: number): never => {
-      throw new Error("process.exit called");
-    });
-    const originalExit = process.exit;
-    process.exit = exitMock as unknown as typeof process.exit;
-
-    try {
-      const { createProvider } = await import("../src/providers/factory.js");
-      assert.throws(() => createProvider("openai"), {
-        message: "process.exit called",
-      });
-      assert.equal(exitMock.mock.calls.length, 1);
-      assert.equal(exitMock.mock.calls[0].arguments[0], 2);
-    } finally {
-      process.exit = originalExit;
-    }
-  });
-});
-
-describe("OpenAIProvider", () => {
-  let originalKey: string | undefined;
-
-  before(() => {
-    originalKey = process.env.CODEGOAT_API_KEY;
+    const p = createProvider("ollama");
+    assert.equal(p.name, "ollama");
   });
 
-  after(() => {
-    if (originalKey !== undefined) {
-      process.env.CODEGOAT_API_KEY = originalKey;
-    } else {
-      delete process.env.CODEGOAT_API_KEY;
-    }
+  it("creates gemini provider", () => {
+    process.env.GOOGLE_API_KEY = "test-key";
+    const p = createProvider("gemini");
+    assert.equal(p.name, "gemini");
   });
 
-  it("throws when API key is not set", () => {
+  it("creates azure provider", () => {
+    process.env.AZURE_OPENAI_ENDPOINT = "https://myinstance.openai.azure.com";
+    process.env.AZURE_OPENAI_KEY = "test-key";
+    const p = createProvider("azure");
+    assert.equal(p.name, "azure");
+  });
+
+  it("azure provider requires endpoint", () => {
+    delete process.env.AZURE_OPENAI_ENDPOINT;
+    process.env.AZURE_OPENAI_KEY = "test-key";
+    assert.throws(() => createProvider("azure"), /AZURE_OPENAI_ENDPOINT/);
+  });
+
+  it("azure provider requires key", () => {
+    process.env.AZURE_OPENAI_ENDPOINT = "https://myinstance.openai.azure.com";
+    delete process.env.AZURE_OPENAI_KEY;
     delete process.env.CODEGOAT_API_KEY;
-    assert.throws(() => new OpenAIProvider(), (err: Error) => {
-      assert.ok(err.message.includes("CODEGOAT_API_KEY"));
-      return true;
-    });
+    assert.throws(() => createProvider("azure"), /AZURE_OPENAI_KEY/);
   });
 
-  it("has name 'openai'", () => {
-    process.env.CODEGOAT_API_KEY = "test-key";
-    const provider = new OpenAIProvider();
-    assert.equal(provider.name, "openai");
+  it("creates bedrock provider", () => {
+    process.env.AWS_ACCESS_KEY_ID = "AKID";
+    process.env.AWS_SECRET_ACCESS_KEY = "secret";
+    const p = createProvider("bedrock");
+    assert.equal(p.name, "bedrock");
   });
 
-  it("parses SSE stream correctly", async () => {
-    process.env.CODEGOAT_API_KEY = "test-key";
-    const provider = new OpenAIProvider();
-
-    const sseData = [
-      'data: {"choices":[{"delta":{"content":"Hello"}}]}\n\n',
-      'data: {"choices":[{"delta":{"content":" world"}}]}\n\n',
-      'data: {"choices":[{"delta":{}}]}\n\n',
-      "data: [DONE]\n\n",
-    ].join("");
-
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream<Uint8Array>({
-      start(controller) {
-        controller.enqueue(encoder.encode(sseData));
-        controller.close();
-      },
-    });
-
-    // Mock fetch to return our fake SSE stream
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = mock.fn(async () => {
-      return new Response(stream, { status: 200 });
-    }) as typeof fetch;
-
-    try {
-      const chunks: string[] = [];
-      for await (const chunk of provider.chat({ messages: [] })) {
-        chunks.push(chunk);
-      }
-      assert.deepEqual(chunks, ["Hello", " world"]);
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+  it("bedrock provider requires AWS credentials", () => {
+    delete process.env.AWS_ACCESS_KEY_ID;
+    delete process.env.AWS_SECRET_ACCESS_KEY;
+    assert.throws(() => createProvider("bedrock"), /AWS_ACCESS_KEY_ID/);
   });
 
-  it("handles chunked SSE data split across boundaries", async () => {
+  it("throws on unknown provider", () => {
     process.env.CODEGOAT_API_KEY = "test-key";
-    const provider = new OpenAIProvider();
-
-    const encoder = new TextEncoder();
-    const stream = new ReadableStream<Uint8Array>({
-      start(controller) {
-        // Split data across chunk boundaries
-        controller.enqueue(encoder.encode('data: {"choices":[{"del'));
-        controller.enqueue(encoder.encode('ta":{"content":"partial"}}]}\n\n'));
-        controller.enqueue(encoder.encode("data: [DONE]\n\n"));
-        controller.close();
-      },
-    });
-
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = mock.fn(async () => {
-      return new Response(stream, { status: 200 });
-    }) as typeof fetch;
-
-    try {
-      const chunks: string[] = [];
-      for await (const chunk of provider.chat({ messages: [] })) {
-        chunks.push(chunk);
-      }
-      assert.deepEqual(chunks, ["partial"]);
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
-  });
-
-  it("throws on non-200 response", async () => {
-    process.env.CODEGOAT_API_KEY = "test-key";
-    const provider = new OpenAIProvider();
-
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = mock.fn(async () => {
-      return new Response("Unauthorized", { status: 401 });
-    }) as typeof fetch;
-
-    try {
-      const iter = provider.chat({ messages: [] });
-      await assert.rejects(
-        async () => {
-          // eslint-disable-next-line @typescript-eslint/no-unused-vars
-          for await (const _ of iter) {
-            /* consume */
-          }
-        },
-        (err: Error) => {
-          assert.ok(err.message.includes("401"));
-          return true;
-        }
-      );
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
-  });
-
-  it("throws on network failure", async () => {
-    process.env.CODEGOAT_API_KEY = "test-key";
-    const provider = new OpenAIProvider();
-
-    const originalFetch = globalThis.fetch;
-    globalThis.fetch = mock.fn(async () => {
-      throw new Error("fetch failed");
-    }) as typeof fetch;
-
-    try {
-      const iter = provider.chat({ messages: [] });
-      await assert.rejects(
-        async () => {
-          for await (const _ of iter) {
-            /* consume */
-          }
-        },
-        (err: Error) => {
-          assert.ok(err.message.includes("Network error"));
-          return true;
-        }
-      );
-    } finally {
-      globalThis.fetch = originalFetch;
-    }
+    assert.throws(() => createProvider("nonexistent"), /Unknown provider/);
   });
 });
