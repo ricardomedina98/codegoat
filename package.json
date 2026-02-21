@@ -1,0 +1,27 @@
+{
+  "name": "codegoat",
+  "version": "0.1.0",
+  "description": "AI-powered code review and documentation generator for small teams",
+  "type": "module",
+  "bin": {
+    "codegoat": "./dist/cli.js"
+  },
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "start": "node dist/cli.js",
+    "lint": "tsc --noEmit"
+  },
+  "keywords": ["code-review", "documentation", "cli", "ai"],
+  "license": "MIT",
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "commander": "^13.0.0"
+  },
+  "devDependencies": {
+    "typescript": "^5.7.0",
+    "@types/node": "^22.0.0"
+  }
+}
