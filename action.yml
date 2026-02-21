@@ -42,6 +42,10 @@ inputs:
     description: "GitHub token for posting PR comments (needs write permissions)"
     required: false
     default: ${{ github.token }}
+  upload-sarif:
+    description: "Upload SARIF to GitHub Code Scanning (requires security-events: write)"
+    required: false
+    default: "false"
 
 runs:
   using: "composite"
@@ -79,3 +83,30 @@ runs:
           --fail-on ${{ inputs.fail-on }} \
           $COMMENT_FLAGS \
           --format markdown
+
+    - name: Generate SARIF
+      if: inputs.upload-sarif == 'true'
+      shell: bash
+      env:
+        CODEGOAT_API_KEY: ${{ inputs.api-key }}
+        CODEGOAT_PROVIDER: ${{ inputs.provider }}
+        CODEGOAT_MODEL: ${{ inputs.model }}
+        NO_COLOR: "1"
+      run: |
+        DIFF_FLAG=""
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          DIFF_FLAG="--diff origin/${{ github.event.pull_request.base.ref }}...origin/${{ github.event.pull_request.head.ref }}"
+        fi
+        cd ${{ github.workspace }} && node ${{ github.action_path }}/dist/cli.js review . \
+          $DIFF_FLAG \
+          --budget ${{ inputs.budget }} \
+          --severity ${{ inputs.severity }} \
+          --format sarif \
+          -o codegoat-results.sarif || true
+
+    - name: Upload SARIF
+      if: inputs.upload-sarif == 'true'
+      uses: github/codeql-action/upload-sarif@v3
+      with:
+        sarif_file: codegoat-results.sarif
+        category: codegoat

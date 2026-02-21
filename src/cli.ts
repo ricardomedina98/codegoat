@@ -35,7 +35,7 @@ program
   .option("-p, --provider <name>", "LLM provider (default: openai)")
   .option("-m, --model <name>", "model name")
   .option("-b, --budget <tokens>", "max token budget")
-  .option("-f, --format <type>", "output format: markdown or json")
+  .option("-f, --format <type>", "output format: markdown, json, or sarif")
   .option("-d, --diff [ref]", "review only changed files from git diff (optional: branch or range)")
   .option("-s, --severity <level>", "minimum severity to show: critical, warning, info, style", "info")
   .option("--fail-on <level>", "exit 1 if findings at this severity or above (none to disable)", "critical")
@@ -62,11 +62,12 @@ program
       return;
     }
     const format = opts.format ?? config.format ?? "markdown";
+    const resolvedFormat = (format === "json" ? "json" : format === "sarif" ? "sarif" : "markdown") as "markdown" | "json" | "sarif";
     await runReview(path, {
       provider: opts.provider,
       model: opts.model,
       budget: opts.budget ? parseInt(opts.budget, 10) : undefined,
-      format: (format === "json" ? "json" : "markdown") as "markdown" | "json",
+      format: resolvedFormat,
       diff: opts.diff,
       severity: opts.severity,
       failOn: opts.failOn,

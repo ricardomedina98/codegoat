@@ -12,6 +12,7 @@ import {
   severityFromString, SEVERITY_EMOJI, SEVERITY_ORDER, type Severity,
 } from "../output/severity.js";
 import { cacheKey, getCached, setCached, ensureCacheDir, type CacheConfig } from "../cache/cache.js";
+import { findingsToSarif } from "../output/sarif.js";
 import { detectPRContext, postPRReview } from "../github/pr-review.js";
 import { detectCIContext, detectCIPlatform, type CIContext } from "../ci/adapter.js";
 import { gitlabAdapter } from "../ci/gitlab.js";
@@ -25,7 +26,7 @@ export interface ReviewOptions {
   provider?: string;
   model?: string;
   budget?: number;
-  format?: "markdown" | "json";
+  format?: "markdown" | "json" | "sarif";
   noColor?: boolean;
   diff?: boolean | string;
   severity?: string;
@@ -117,7 +118,7 @@ export async function runReview(
 async function runDiffReview(
   targetPath: string,
   options: ReviewOptions,
-  format: "markdown" | "json"
+  format: "markdown" | "json" | "sarif"
 ): Promise<void> {
   const diffArg = typeof options.diff === "string" ? options.diff : undefined;
 
@@ -160,7 +161,7 @@ async function streamLLM(
   provider: ReturnType<typeof createProvider>,
   messages: Array<{ role: string; content: string }>,
   options: ReviewOptions,
-  format: "markdown" | "json"
+  format: "markdown" | "json" | "sarif"
 ): Promise<string> {
   const request = { messages: messages as any, model: options.model ?? process.env.CODEGOAT_MODEL, stream: true };
   const spinner = createSpinner("Reviewing...");
@@ -187,7 +188,7 @@ async function streamLLM(
 
 async function handleOutput(
   result: ReviewResult,
-  format: "markdown" | "json",
+  format: "markdown" | "json" | "sarif",
   options: ReviewOptions
 ): Promise<void> {
   const threshold = severityFromString(options.severity ?? process.env.CODEGOAT_SEVERITY ?? "info");
@@ -216,6 +217,9 @@ async function handleOutput(
       review: result.raw,
     };
     process.stdout.write(JSON.stringify(jsonOut, null, 2) + "\n");
+  } else if (format === "sarif") {
+    const sarif = findingsToSarif(filtered, CODEGOAT_VERSION);
+    process.stdout.write(JSON.stringify(sarif, null, 2) + "\n");
   } else {
     const parts = (["critical", "warning", "info", "style"] as Severity[])
       .filter((s) => allCounts[s] > 0)
