@@ -268,7 +268,9 @@ The action auto-uses `--diff` mode on PRs for faster, cheaper, more focused revi
 
 ## Supported Languages
 
-Currently: TypeScript, JavaScript (`.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`)
+- **TypeScript / JavaScript:** `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`
+- **Python:** `.py`
+- **Go:** `.go`
 
 More coming based on demand — [open an issue](../../issues) to request yours.
 

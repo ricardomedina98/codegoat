@@ -32,7 +32,7 @@ export async function runReview(
   const files = await discoverFiles(targetPath);
 
   if (files.length === 0) {
-    console.error("No supported files found. codegoat reviews .ts, .tsx, .js, .jsx, .mjs, .cjs files.");
+    console.error("No supported files found. codegoat supports .ts, .tsx, .js, .jsx, .mjs, .cjs, .py, .go files.");
     process.exit(0);
   }
 

@@ -90,8 +90,9 @@ const DOCS_SYSTEM_PROMPTS: Record<DocsLevel, string> = {
     "Use markdown formatting with a section per file.",
   function:
     "You are a technical writer generating function-level documentation. " +
-    "For each exported function, class, or interface, write a JSDoc/TSDoc comment block. " +
-    "Include: a one-line summary, @param descriptions, @returns description, and any important notes. " +
+    "For each exported/public function, class, or interface, write documentation comments in the appropriate format: " +
+    "JSDoc/TSDoc for TypeScript/JavaScript, docstrings for Python, godoc comments for Go. " +
+    "Include: a one-line summary, parameter descriptions, return description, and any important notes. " +
     "Be precise about types and behavior. Output as markdown code blocks showing the doc comments.",
 };
 
@@ -112,7 +113,7 @@ const DOCS_USER_SUFFIXES: Record<DocsLevel, string> = {
     "Cover every file. Be specific.",
   function:
     "For each exported function, class, and interface in the code above, " +
-    "generate a JSDoc/TSDoc comment. Format as:\n\n" +
+    "generate documentation comments (JSDoc/TSDoc for JS/TS, docstrings for Python, godoc for Go). Format as:\n\n" +
     "### `<filepath>` — `<exportName>`\n\n" +
     "```typescript\n" +
     "/**\n * <description>\n * @param <name> - <description>\n * @returns <description>\n */\n" +
