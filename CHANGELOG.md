@@ -1,5 +1,32 @@
 # Changelog
 
+## [1.1.0] - 2026-02-21
+
+### Added
+
+- **Google Gemini provider** — 4th LLM provider
+  - Default model: gemini-2.0-flash (free tier friendly)
+  - Auth: `GOOGLE_API_KEY` or `CODEGOAT_API_KEY` fallback
+  - SSE streaming via Gemini `streamGenerateContent` API
+  - System instructions via `systemInstruction` parameter
+
+- **VS Code extension** — AI code review in your editor
+  - Thin CLI wrapper (`codegoat-vscode/`)
+  - Commands: Review File, Review Workspace, Clear Diagnostics
+  - Inline diagnostics with severity → DiagnosticSeverity mapping
+  - Status bar with review status and finding counts
+  - Settings: provider, model, severity, reviewOnSave, cliPath
+  - Review on save (configurable, off by default)
+
+- **Bitbucket Pipelines CI** — 3rd CI platform
+  - Inline PR comments via Bitbucket REST API 2.0
+  - Auto-detect via `BITBUCKET_PIPELINE_UUID`
+  - `bitbucket-pipelines.yml` template in docs
+
+- **Monorepo support** — Config walk-up with deep merge
+  - `.codegoatrc` inheritance from target dir to repo root
+  - Package boundary detection (package.json, go.mod, Cargo.toml, etc.)
+
 ## [1.0.0] - 2026-02-21 🎉
 
 ### 🐐 codegoat v1.0 — AI-Powered Code Review for Every Developer
