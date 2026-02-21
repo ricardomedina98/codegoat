@@ -10,6 +10,9 @@ import {
   parseFindings, filterBySeverity, getMaxSeverity, countBySeverity,
   severityFromString, SEVERITY_EMOJI, SEVERITY_ORDER, type Severity,
 } from "../output/severity.js";
+import { cacheKey, getCached, setCached, ensureCacheDir, type CacheConfig } from "../cache/cache.js";
+
+const CODEGOAT_VERSION = "0.4.0";
 
 export interface ReviewOptions {
   provider?: string;
@@ -21,6 +24,7 @@ export interface ReviewOptions {
   severity?: string;
   failOn?: string;
   noIgnore?: boolean;
+  noCache?: boolean;
   rules?: string[];
 }
 
@@ -58,9 +62,41 @@ export async function runReview(
 
   console.error("");
 
+  const rootPath = require("node:path").resolve(targetPath);
+
+  // Cache check (skip for --no-cache)
+  if (!options.noCache) {
+    const cConfig: CacheConfig = { provider: options.provider, model: options.model, rules: options.rules };
+    // Composite key from all included file contents
+    const allContent = included.map(f => f.path + "\n" + f.content).join("\0");
+    const key = cacheKey(allContent, "review", cConfig, CODEGOAT_VERSION);
+    const cached = getCached(rootPath, key);
+    if (cached) {
+      console.error("⚡ Cache hit — using cached review\n");
+      if (format === "markdown") {
+        process.stdout.write(cached + "\n");
+      }
+      handleOutput(
+        { raw: cached, filesScanned: included.length, filesSkipped: skipped.length, estimatedTokens: 0 },
+        format, options
+      );
+      return;
+    }
+  }
+
   const provider = createProvider(options.provider);
   const messages = buildReviewPrompt(included, options.rules);
   const raw = await streamLLM(provider, messages, options, format);
+
+  // Store in cache
+  if (!options.noCache) {
+    try {
+      const cConfig: CacheConfig = { provider: options.provider, model: options.model, rules: options.rules };
+      const allContent = included.map(f => f.path + "\n" + f.content).join("\0");
+      const key = cacheKey(allContent, "review", cConfig, CODEGOAT_VERSION);
+      setCached(rootPath, key, raw, CODEGOAT_VERSION);
+    } catch { /* best effort */ }
+  }
 
   handleOutput(
     { raw, filesScanned: included.length, filesSkipped: skipped.length, estimatedTokens: totalTokens },

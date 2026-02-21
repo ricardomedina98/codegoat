@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { Command } from "commander";
 import { runReview } from "./commands/review.js";
 import { runWatch } from "./commands/watch.js";
+import { clearCache, getCacheStatus } from "./cache/cache.js";
 import { runDocs } from "./commands/docs.js";
 import { loadConfig, applyConfig, generateStarterConfig } from "./config.js";
 
@@ -29,8 +30,9 @@ program
   .option("--fail-on <level>", "exit 1 if findings at this severity or above (none to disable)", "critical")
   .option("--no-ignore", "skip .codegoatignore file")
   .option("-w, --watch", "watch for file changes and re-review incrementally")
+  .option("--no-cache", "skip review cache")
   .option("--no-color", "disable color output")
-  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; ignore?: boolean; watch?: boolean; color?: boolean }) => {
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; ignore?: boolean; watch?: boolean; cache?: boolean; color?: boolean }) => {
     applyConfig(opts, config);
     const rules = config.rules?.filter((r: string) => !r.startsWith("//"));
     if (opts.watch) {
@@ -53,6 +55,7 @@ program
       severity: opts.severity,
       failOn: opts.failOn,
       noIgnore: opts.ignore === false,
+      noCache: opts.cache === false,
       noColor: opts.color === false,
       rules,
     });
@@ -91,6 +94,31 @@ program
     fs.writeFileSync(target, generateStarterConfig());
     console.log("Created .codegoatrc with default settings.");
     console.log("Edit it to customize your codegoat configuration.");
+  });
+
+const cacheCmd = program
+  .command("cache")
+  .description("Manage the review cache");
+
+cacheCmd
+  .command("status")
+  .description("Show cache statistics")
+  .action(() => {
+    const status = getCacheStatus(process.cwd());
+    console.log(`Cache entries: ${status.entries}`);
+    console.log(`Total size: ${(status.totalBytes / 1024).toFixed(1)} KB / ${(status.maxBytes / 1024 / 1024).toFixed(0)} MB`);
+    if (status.oldestAge !== null) {
+      const mins = Math.round(status.oldestAge / 60000);
+      console.log(`Oldest entry: ${mins < 60 ? `${mins}m` : `${(mins / 60).toFixed(1)}h`} ago`);
+    }
+  });
+
+cacheCmd
+  .command("clear")
+  .description("Clear all cached reviews")
+  .action(() => {
+    const count = clearCache(process.cwd());
+    console.log(`Cleared ${count} cached review${count !== 1 ? "s" : ""}.`);
   });
 
 program.parse();
