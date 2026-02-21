@@ -13,7 +13,7 @@ import {
 import { cacheKey, getCached, setCached, ensureCacheDir, type CacheConfig } from "../cache/cache.js";
 import { detectPRContext, postPRReview } from "../github/pr-review.js";
 
-const CODEGOAT_VERSION = "0.5.0";
+const CODEGOAT_VERSION = "0.6.0";
 
 export type CommentMode = "inline" | "summary" | "log";
 

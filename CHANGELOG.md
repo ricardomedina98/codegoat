@@ -1,5 +1,28 @@
 # Changelog
 
+## [0.6.0] - 2026-02-21
+
+### Added
+
+- **Inline PR comments** — GitHub Reviews API integration
+  - Posts inline comments on exact diff lines (up to 30 per review)
+  - Single review = 1 notification to PR author
+  - `REQUEST_CHANGES` when `--fail-on` threshold exceeded, `COMMENT` otherwise
+  - Closest-line fallback for findings near but not on diff lines
+  - Dismisses previous codegoat reviews before posting new one
+  - `--comment-mode inline|summary|log` (auto-detects PR context)
+  - `--comment-severity <level>` (default: warning — info/style in body only)
+
+- **Demo repository** — [codegoat-demo](https://github.com/ricardomedina98/codegoat-demo)
+  - Multi-language codebase (JS/TS, Python, Go) with intentional issues
+  - Pre-configured `.codegoatrc`, `.codegoatignore`, GitHub Action workflow
+  - Example review outputs for full scan, diff, and severity filtering
+
+### Changed
+
+- GitHub Action simplified — inline comments handled inside review command
+- Action inputs: added `severity`, `fail-on`, `comment-mode`, `comment-severity`
+
 ## [0.5.0] - 2026-02-21
 
 ### Added
