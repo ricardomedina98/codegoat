@@ -1,5 +1,5 @@
 name: "codegoat review"
-description: "AI-powered code review — posts review comments on pull requests"
+description: "AI-powered code review — posts inline review comments on pull requests"
 author: "OpenGoat"
 
 branding:
@@ -22,8 +22,24 @@ inputs:
     description: "Max token budget for file content"
     required: false
     default: "100000"
+  severity:
+    description: "Minimum severity to show (critical, warning, info, style)"
+    required: false
+    default: "info"
+  fail-on:
+    description: "Exit 1 / REQUEST_CHANGES at this severity (none to disable)"
+    required: false
+    default: "critical"
+  comment-mode:
+    description: "PR comment mode: inline, summary, or log"
+    required: false
+    default: "inline"
+  comment-severity:
+    description: "Minimum severity for inline PR comments"
+    required: false
+    default: "warning"
   github-token:
-    description: "GitHub token for posting PR comments"
+    description: "GitHub token for posting PR comments (needs write permissions)"
     required: false
     default: ${{ github.token }}
 
@@ -43,43 +59,23 @@ runs:
         npm run build
 
     - name: Run review
-      id: review
       shell: bash
       env:
         CODEGOAT_API_KEY: ${{ inputs.api-key }}
         CODEGOAT_PROVIDER: ${{ inputs.provider }}
         CODEGOAT_MODEL: ${{ inputs.model }}
+        GITHUB_TOKEN: ${{ inputs.github-token }}
         NO_COLOR: "1"
       run: |
         DIFF_FLAG=""
+        COMMENT_FLAGS="--comment-mode ${{ inputs.comment-mode }} --comment-severity ${{ inputs.comment-severity }}"
         if [ "${{ github.event_name }}" = "pull_request" ]; then
           DIFF_FLAG="--diff origin/${{ github.event.pull_request.base.ref }}...origin/${{ github.event.pull_request.head.ref }}"
         fi
-        REVIEW=$(cd ${{ github.workspace }} && node ${{ github.action_path }}/dist/cli.js review . $DIFF_FLAG --budget ${{ inputs.budget }} --format markdown 2>/dev/null || true)
-        if [ -z "$REVIEW" ]; then
-          echo "No review output generated"
-          echo "has_review=false" >> "$GITHUB_OUTPUT"
-          exit 0
-        fi
-        # Write to file to handle multi-line output
-        echo "$REVIEW" > /tmp/codegoat-review.md
-        echo "has_review=true" >> "$GITHUB_OUTPUT"
-
-    - name: Post PR comment
-      if: steps.review.outputs.has_review == 'true' && github.event_name == 'pull_request'
-      shell: bash
-      env:
-        GH_TOKEN: ${{ inputs.github-token }}
-      run: |
-        # Delete previous codegoat comment if exists
-        PREVIOUS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
-          --jq '.[] | select(.body | startswith("## codegoat review")) | .id' 2>/dev/null || true)
-        if [ -n "$PREVIOUS" ]; then
-          for id in $PREVIOUS; do
-            gh api repos/${{ github.repository }}/issues/comments/$id -X DELETE 2>/dev/null || true
-          done
-        fi
-        # Post new comment
-        gh pr comment ${{ github.event.pull_request.number }} \
-          --repo ${{ github.repository }} \
-          --body-file /tmp/codegoat-review.md
+        cd ${{ github.workspace }} && node ${{ github.action_path }}/dist/cli.js review . \
+          $DIFF_FLAG \
+          --budget ${{ inputs.budget }} \
+          --severity ${{ inputs.severity }} \
+          --fail-on ${{ inputs.fail-on }} \
+          $COMMENT_FLAGS \
+          --format markdown

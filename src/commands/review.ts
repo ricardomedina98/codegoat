@@ -11,8 +11,11 @@ import {
   severityFromString, SEVERITY_EMOJI, SEVERITY_ORDER, type Severity,
 } from "../output/severity.js";
 import { cacheKey, getCached, setCached, ensureCacheDir, type CacheConfig } from "../cache/cache.js";
+import { detectPRContext, postPRReview } from "../github/pr-review.js";
 
 const CODEGOAT_VERSION = "0.5.0";
+
+export type CommentMode = "inline" | "summary" | "log";
 
 export interface ReviewOptions {
   provider?: string;
@@ -26,6 +29,8 @@ export interface ReviewOptions {
   noIgnore?: boolean;
   noCache?: boolean;
   rules?: string[];
+  commentMode?: CommentMode;
+  commentSeverity?: string;
 }
 
 export async function runReview(
@@ -76,7 +81,7 @@ export async function runReview(
       if (format === "markdown") {
         process.stdout.write(cached + "\n");
       }
-      handleOutput(
+      await handleOutput(
         { raw: cached, filesScanned: included.length, filesSkipped: skipped.length, estimatedTokens: 0 },
         format, options
       );
@@ -98,7 +103,7 @@ export async function runReview(
     } catch { /* best effort */ }
   }
 
-  handleOutput(
+  await handleOutput(
     { raw, filesScanned: included.length, filesSkipped: skipped.length, estimatedTokens: totalTokens },
     format, options
   );
@@ -140,7 +145,7 @@ async function runDiffReview(
   const messages = buildDiffReviewPrompt(diffFiles, totalAdded, totalRemoved, options.rules);
   const raw = await streamLLM(provider, messages, options, format);
 
-  handleOutput(
+  await handleOutput(
     { raw, filesScanned: included.length, filesSkipped: skipped.length, estimatedTokens: totalTokens },
     format, options
   );
@@ -174,11 +179,11 @@ async function streamLLM(
   return raw;
 }
 
-function handleOutput(
+async function handleOutput(
   result: ReviewResult,
   format: "markdown" | "json",
   options: ReviewOptions
-): void {
+): Promise<void> {
   const threshold = severityFromString(options.severity ?? process.env.CODEGOAT_SEVERITY ?? "info");
   const failOn: Severity = options.failOn === "none" ? "style" : severityFromString(options.failOn ?? "critical");
 
@@ -212,6 +217,24 @@ function handleOutput(
     const hiddenCount = parsed.findings.length - filtered.length;
     const hiddenNote = hiddenCount > 0 ? ` (${hiddenCount} below threshold hidden)` : "";
     console.error(`\n📊 ${result.filesScanned} files reviewed · ${parts.join(" · ") || "no findings"}${hiddenNote}`);
+  }
+
+  // PR inline comments
+  const commentMode = options.commentMode ?? (detectPRContext() ? "inline" : "log");
+  if (commentMode === "inline" && parsed.findings.length > 0) {
+    const prCtx = detectPRContext();
+    if (prCtx) {
+      try {
+        const commentSev = severityFromString(options.commentSeverity ?? "warning");
+        const result = await postPRReview(prCtx, parsed.findings, {
+          commentSeverity: commentSev,
+          failOn,
+        });
+        console.error(`\n💬 Posted PR review: ${result.posted} inline comment(s), ${result.summary} in summary`);
+      } catch (err) {
+        console.error(`\n⚠️ Failed to post PR review: ${err instanceof Error ? err.message : String(err)}`);
+      }
+    }
   }
 
   if (maxSev && SEVERITY_ORDER[maxSev] >= SEVERITY_ORDER[failOn]) {

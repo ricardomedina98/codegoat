@@ -31,8 +31,10 @@ program
   .option("--no-ignore", "skip .codegoatignore file")
   .option("-w, --watch", "watch for file changes and re-review incrementally")
   .option("--no-cache", "skip review cache")
+  .option("--comment-mode <mode>", "PR comment mode: inline, summary, or log (default: inline in PR context)")
+  .option("--comment-severity <level>", "minimum severity for inline PR comments (default: warning)")
   .option("--no-color", "disable color output")
-  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; ignore?: boolean; watch?: boolean; cache?: boolean; color?: boolean }) => {
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; ignore?: boolean; watch?: boolean; cache?: boolean; commentMode?: string; commentSeverity?: string; color?: boolean }) => {
     applyConfig(opts, config);
     const rules = config.rules?.filter((r: string) => !r.startsWith("//"));
     if (opts.watch) {
@@ -57,6 +59,8 @@ program
       noIgnore: opts.ignore === false,
       noCache: opts.cache === false,
       noColor: opts.color === false,
+      commentMode: (opts.commentMode as any) ?? undefined,
+      commentSeverity: opts.commentSeverity,
       rules,
     });
   });
