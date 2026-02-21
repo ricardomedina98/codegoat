@@ -17,7 +17,7 @@ import { detectCIContext, detectCIPlatform, type CIContext } from "../ci/adapter
 import { gitlabAdapter } from "../ci/gitlab.js";
 import { bitbucketAdapter } from "../ci/bitbucket.js";
 
-const CODEGOAT_VERSION = "0.7.0";
+const CODEGOAT_VERSION = "1.0.0";
 
 export type CommentMode = "inline" | "summary" | "log";
 

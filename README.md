@@ -1,5 +1,7 @@
 # 🐐 codegoat
 
+[![v1.0.0](https://img.shields.io/badge/version-1.0.0-brightgreen)](https://github.com/ricardomedina98/codegoat/releases/tag/v1.0.0) [![Tests](https://img.shields.io/badge/tests-168%20passing-brightgreen)]() [![License: MIT](https://img.shields.io/badge/license-MIT-blue)]()
+
 **AI-powered code review for developers who ship fast.** Free, open source, runs on your machine.
 
 ```bash

@@ -16,7 +16,7 @@ const program = new Command();
 program
   .name("codegoat")
   .description("AI-powered code review and documentation generator")
-  .version("0.7.0")
+  .version("1.0.0")
   .option("-v, --verbose", "enable debug logging")
   .option("-q, --quiet", "suppress all output except findings and errors")
   .hook("preAction", () => {

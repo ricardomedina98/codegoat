@@ -1,5 +1,72 @@
 # Changelog
 
+## [1.0.0] - 2026-02-21 🎉
+
+### 🐐 codegoat v1.0 — AI-Powered Code Review for Every Developer
+
+The first stable release. Everything you need to add AI code review to your workflow — from a quick local scan to fully automated PR reviews in CI.
+
+### Core Features
+
+- **`codegoat review <path>`** — Full codebase review with AI
+- **`codegoat review . --diff`** — PR-level review of only changed files
+- **`codegoat review . --watch`** — Live review as you code (file watcher with 500ms debounce)
+- **`codegoat docs <path>`** — AI documentation generation (project/file/function levels)
+- **`codegoat init`** — Generate starter `.codegoatrc` config
+
+### 8 Languages Supported
+
+TypeScript, JavaScript, Python, Go, Ruby, Java, Rust — with language-specific documentation styles (JSDoc, docstrings, godoc, YARD, Javadoc, rustdoc)
+
+### 3 LLM Providers
+
+- **OpenAI** — GPT-4o, GPT-4o-mini, any OpenAI-compatible model
+- **Anthropic** — Claude 3.5 Sonnet, Claude 3 Opus
+- **Ollama** — Run locally with any model, no API key needed
+
+### 3 CI Platforms with Inline Comments
+
+- **GitHub Actions** — Inline PR comments via Reviews API, `REQUEST_CHANGES` on critical findings
+- **GitLab CI** — Inline MR comments via Discussions API, self-hosted support
+- **Bitbucket Pipelines** — Inline PR comments via REST API 2.0
+
+### Severity System
+
+- 4 levels: 🔴 critical, 🟡 warning, 🔵 info, ⚪ style
+- `--severity` threshold filter (default: info)
+- `--fail-on` exit code control (default: critical)
+- `--comment-severity` for inline CI comments (default: warning)
+
+### Configuration
+
+- **`.codegoatrc`** — JSON config with provider, model, budget, custom rules
+- **`.codegoatignore`** — Gitignore-syntax file exclusion (additive to .gitignore)
+- **Custom rules** — Project-specific review rules injected into LLM prompts
+- **Monorepo support** — Config walk-up with deep merge (child wins on scalars, rules concatenate)
+- **Package detection** — Automatic boundary detection via package.json, go.mod, Cargo.toml, etc.
+
+### Review Caching
+
+- Content-aware cache keys (file hash + config + version)
+- `.codegoat-cache/` with 10MB LRU eviction
+- `codegoat cache status` and `codegoat cache clear`
+- `--no-cache` flag for fresh reviews
+
+### CLI Polish
+
+- Standardized exit codes: 0=success, 1=findings, 2=config error, 3=network error
+- `--verbose` for debug logging, `--quiet` for scripting
+- ANSI colors with `--no-color` support
+- Progress spinner during LLM calls
+- JSON output with `--format json`
+
+### Architecture
+
+- **Minimal dependencies** — Only `commander` + `ignore` at runtime
+- **Native `fetch`** for all API calls (no SDKs)
+- **Streaming** via `AsyncIterable<string>` across all providers
+- **168 tests**, all passing
+
 ## [0.7.0] - 2026-02-21
 
 ### Added
