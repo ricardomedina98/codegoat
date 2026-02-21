@@ -15,7 +15,7 @@ const program = new Command();
 program
   .name("codegoat")
   .description("AI-powered code review and documentation generator")
-  .version("0.4.0");
+  .version("0.5.0");
 
 program
   .command("review")

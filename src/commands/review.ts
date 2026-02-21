@@ -12,7 +12,7 @@ import {
 } from "../output/severity.js";
 import { cacheKey, getCached, setCached, ensureCacheDir, type CacheConfig } from "../cache/cache.js";
 
-const CODEGOAT_VERSION = "0.4.0";
+const CODEGOAT_VERSION = "0.5.0";
 
 export interface ReviewOptions {
   provider?: string;

@@ -1,5 +1,25 @@
 # Changelog
 
+## [0.5.0] - 2026-02-21
+
+### Added
+
+- **Watch mode** — `codegoat review . --watch`
+  - Monitors file changes, reviews only changed files on save
+  - 500ms debounce batches rapid saves
+  - Severity summary after each incremental review
+  - Respects .codegoatignore, clean Ctrl+C shutdown
+  - Native `fs.watch` — no new dependencies
+
+- **Review caching system** — instant results on unchanged files
+  - Cache key: content hash + config hash + codegoat version
+  - `.codegoat-cache/` directory, auto-added to .gitignore
+  - `codegoat cache status` — view cache statistics
+  - `codegoat cache clear` — wipe all cached reviews
+  - `--no-cache` flag to force fresh review
+  - 10MB max with LRU eviction, corrupt entry auto-cleanup
+  - Skipped for `--diff` mode (diffs are always fresh)
+
 ## [0.4.0] - 2026-02-21
 
 ### Added
