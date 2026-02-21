@@ -51,7 +51,11 @@ runs:
         CODEGOAT_MODEL: ${{ inputs.model }}
         NO_COLOR: "1"
       run: |
-        REVIEW=$(cd ${{ github.workspace }} && node ${{ github.action_path }}/dist/cli.js review . --budget ${{ inputs.budget }} --format markdown 2>/dev/null || true)
+        DIFF_FLAG=""
+        if [ "${{ github.event_name }}" = "pull_request" ]; then
+          DIFF_FLAG="--diff origin/${{ github.event.pull_request.base.ref }}...origin/${{ github.event.pull_request.head.ref }}"
+        fi
+        REVIEW=$(cd ${{ github.workspace }} && node ${{ github.action_path }}/dist/cli.js review . $DIFF_FLAG --budget ${{ inputs.budget }} --format markdown 2>/dev/null || true)
         if [ -z "$REVIEW" ]; then
           echo "No review output generated"
           echo "has_review=false" >> "$GITHUB_OUTPUT"

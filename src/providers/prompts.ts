@@ -37,6 +37,41 @@ export function buildReviewPrompt(
   ];
 }
 
+// === Diff Review Prompts ===
+
+const DIFF_REVIEW_SYSTEM_PROMPT =
+  "You are a senior code reviewer reviewing a changeset (diff). " +
+  "Focus on what the changes introduce: new bugs, security risks, missing error handling, regressions. " +
+  "Lines marked [changed] are new/modified — focus your review there. " +
+  "Lines marked [context] are existing code shown for understanding. " +
+  "Be direct and specific. Categorize each issue as Bug, Security, Performance, Style, or Clarity. " +
+  "Reference file names and line numbers.";
+
+export function buildDiffReviewPrompt(
+  files: Array<{ path: string; content: string; linesAdded: number; linesRemoved: number }>,
+  totalAdded: number,
+  totalRemoved: number
+): ChatMessage[] {
+  const fileBlocks = files
+    .map((f) => `=== ${f.path} (+${f.linesAdded} -${f.linesRemoved}) ===\n${f.content}`)
+    .join("\n\n");
+
+  const userContent =
+    `This changeset modifies ${files.length} files (+${totalAdded} -${totalRemoved} lines).\n\n` +
+    fileBlocks +
+    "\n\n" +
+    "Review the changes above. Focus on [changed] lines. For each issue found, format as:\n\n" +
+    "### <filepath>\n\n" +
+    "- **<Category> (line <N>):** <description>\n\n" +
+    "Start with a brief summary of what this changeset does (1-2 sentences).\n" +
+    "End with: '<N> issues found: <breakdown by category>'. If the changes look good, say so briefly.";
+
+  return [
+    { role: "system", content: DIFF_REVIEW_SYSTEM_PROMPT },
+    { role: "user", content: userContent },
+  ];
+}
+
 // === Docs Prompts ===
 
 export type DocsLevel = "project" | "file" | "function";
