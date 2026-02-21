@@ -2,13 +2,17 @@ import type { LLMProvider } from "./types.js";
 import { OpenAIProvider } from "./openai.js";
 import { AnthropicProvider } from "./anthropic.js";
 import { OllamaProvider } from "./ollama.js";
+import { GeminiProvider } from "./gemini.js";
 
 export function createProvider(name?: string): LLMProvider {
   const providerName = name ?? process.env.CODEGOAT_PROVIDER ?? "openai";
 
-  // Ollama doesn't need an API key
+  // Ollama and Gemini don't need CODEGOAT_API_KEY (Gemini uses GOOGLE_API_KEY)
   if (providerName === "ollama") {
     return new OllamaProvider();
+  }
+  if (providerName === "gemini") {
+    return new GeminiProvider();
   }
 
   if (!process.env.CODEGOAT_API_KEY) {
@@ -26,7 +30,7 @@ export function createProvider(name?: string): LLMProvider {
       return new AnthropicProvider();
     default:
       throw new Error(
-        `Unknown provider "${providerName}". Supported providers: openai, anthropic, ollama`
+        `Unknown provider "${providerName}". Supported providers: openai, anthropic, ollama, gemini`
       );
   }
 }
