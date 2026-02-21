@@ -87,11 +87,31 @@ async function walk(
   }
 }
 
+function loadCodegoatIgnore(rootPath: string, parent: Ignore): Ignore {
+  const ig = ignore().add(parent);
+  const ignorePath = path.join(rootPath, ".codegoatignore");
+  try {
+    const content = fs.readFileSync(ignorePath, "utf-8");
+    ig.add(content);
+  } catch {
+    // No .codegoatignore
+  }
+  return ig;
+}
+
+export interface DiscoverOptions {
+  noIgnore?: boolean;
+}
+
 export async function discoverFiles(
-  rootPath: string
+  rootPath: string,
+  options?: DiscoverOptions
 ): Promise<DiscoveredFile[]> {
   const resolvedRoot = path.resolve(rootPath);
-  const ig = loadGitignore(resolvedRoot, ignore());
+  let ig = loadGitignore(resolvedRoot, ignore());
+  if (!options?.noIgnore) {
+    ig = loadCodegoatIgnore(resolvedRoot, ig);
+  }
   const results: DiscoveredFile[] = [];
   await walk(resolvedRoot, resolvedRoot, ig, results);
   return results;

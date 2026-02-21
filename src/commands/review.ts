@@ -20,6 +20,8 @@ export interface ReviewOptions {
   diff?: boolean | string;
   severity?: string;
   failOn?: string;
+  noIgnore?: boolean;
+  rules?: string[];
 }
 
 export async function runReview(
@@ -33,7 +35,7 @@ export async function runReview(
   }
 
   console.error(`Scanning ${targetPath}...`);
-  const files = await discoverFiles(targetPath);
+  const files = await discoverFiles(targetPath, { noIgnore: options.noIgnore });
 
   if (files.length === 0) {
     console.error("No supported files found. codegoat supports .ts, .tsx, .js, .jsx, .mjs, .cjs, .py, .go files.");
@@ -57,7 +59,7 @@ export async function runReview(
   console.error("");
 
   const provider = createProvider(options.provider);
-  const messages = buildReviewPrompt(included);
+  const messages = buildReviewPrompt(included, options.rules);
   const raw = await streamLLM(provider, messages, options, format);
 
   handleOutput(
@@ -99,7 +101,7 @@ async function runDiffReview(
 
   const provider = createProvider(options.provider);
   const diffFiles = included as unknown as Array<{ path: string; content: string; linesAdded: number; linesRemoved: number }>;
-  const messages = buildDiffReviewPrompt(diffFiles, totalAdded, totalRemoved);
+  const messages = buildDiffReviewPrompt(diffFiles, totalAdded, totalRemoved, options.rules);
   const raw = await streamLLM(provider, messages, options, format);
 
   handleOutput(

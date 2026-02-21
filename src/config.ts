@@ -8,6 +8,7 @@ export interface CodegoatConfig {
   budget?: number;
   format?: "markdown" | "json";
   ollamaUrl?: string;
+  rules?: string[];
 }
 
 const CONFIG_FILENAME = ".codegoatrc";
@@ -68,12 +69,46 @@ export function applyConfig(
   }
 }
 
-export const STARTER_CONFIG: CodegoatConfig = {
+const MAX_RULES = 20;
+const MAX_RULE_LENGTH = 200;
+
+export function validateRules(rules: string[]): string[] {
+  const validated: string[] = [];
+  for (const rule of rules.slice(0, MAX_RULES)) {
+    if (typeof rule === "string" && rule.trim()) {
+      const trimmed = rule.trim().slice(0, MAX_RULE_LENGTH);
+      validated.push(trimmed);
+    }
+  }
+  if (rules.length > MAX_RULES) {
+    console.error(`Warning: .codegoatrc has ${rules.length} rules, max is ${MAX_RULES}. Extra rules ignored.`);
+  }
+  return validated;
+}
+
+export const STARTER_CONFIG = {
   provider: "openai",
   model: "gpt-4o-mini",
   budget: 100000,
+  rules: [
+    "// Add project-specific review rules here (remove // prefix to enable)",
+    "// Example: Always check for proper error handling in async functions",
+    "// Example: Ensure all public APIs have input validation",
+  ],
 };
 
 export function generateStarterConfig(): string {
-  return JSON.stringify(STARTER_CONFIG, null, 2) + "\n";
+  // Output clean JSON but with commented rules as hints
+  const config = {
+    provider: STARTER_CONFIG.provider,
+    model: STARTER_CONFIG.model,
+    budget: STARTER_CONFIG.budget,
+    rules: [],
+  };
+  const json = JSON.stringify(config, null, 2);
+  // Add comment hints after the empty rules array
+  return json.replace(
+    '"rules": []',
+    `"rules": [\n    "Always check for proper error handling in async functions",\n    "Ensure all public APIs have input validation"\n  ]`
+  ) + "\n";
 }

@@ -19,8 +19,15 @@ function addLineNumbers(content: string): string {
     .join("\n");
 }
 
+function formatRulesBlock(rules?: string[]): string {
+  if (!rules || rules.length === 0) return "";
+  const rulesList = rules.map((r, i) => `${i + 1}. ${r}`).join("\n");
+  return `\n\nProject-specific rules to check:\n${rulesList}`;
+}
+
 export function buildReviewPrompt(
-  files: Array<{ path: string; content: string }>
+  files: Array<{ path: string; content: string }>,
+  rules?: string[]
 ): ChatMessage[] {
   const fileBlocks = files
     .map((f) => `=== ${f.path} ===\n${addLineNumbers(f.content)}`)
@@ -37,7 +44,7 @@ export function buildReviewPrompt(
     "If the code looks good, say so briefly.";
 
   return [
-    { role: "system", content: REVIEW_SYSTEM_PROMPT },
+    { role: "system", content: REVIEW_SYSTEM_PROMPT + formatRulesBlock(rules) },
     { role: "user", content: userContent },
   ];
 }
@@ -60,7 +67,8 @@ const DIFF_REVIEW_SYSTEM_PROMPT =
 export function buildDiffReviewPrompt(
   files: Array<{ path: string; content: string; linesAdded: number; linesRemoved: number }>,
   totalAdded: number,
-  totalRemoved: number
+  totalRemoved: number,
+  rules?: string[]
 ): ChatMessage[] {
   const fileBlocks = files
     .map((f) => `=== ${f.path} (+${f.linesAdded} -${f.linesRemoved}) ===\n${f.content}`)
@@ -77,7 +85,7 @@ export function buildDiffReviewPrompt(
     "End with: '<N> issues found: <breakdown by category>'. If the changes look good, say so briefly.";
 
   return [
-    { role: "system", content: DIFF_REVIEW_SYSTEM_PROMPT },
+    { role: "system", content: DIFF_REVIEW_SYSTEM_PROMPT + formatRulesBlock(rules) },
     { role: "user", content: userContent },
   ];
 }

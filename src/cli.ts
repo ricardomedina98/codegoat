@@ -26,10 +26,12 @@ program
   .option("-d, --diff [ref]", "review only changed files from git diff (optional: branch or range)")
   .option("-s, --severity <level>", "minimum severity to show: critical, warning, info, style", "info")
   .option("--fail-on <level>", "exit 1 if findings at this severity or above (none to disable)", "critical")
+  .option("--no-ignore", "skip .codegoatignore file")
   .option("--no-color", "disable color output")
-  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; color?: boolean }) => {
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; ignore?: boolean; color?: boolean }) => {
     applyConfig(opts, config);
     const format = opts.format ?? config.format ?? "markdown";
+    const rules = config.rules?.filter((r: string) => !r.startsWith("//"));
     await runReview(path, {
       provider: opts.provider,
       model: opts.model,
@@ -38,7 +40,9 @@ program
       diff: opts.diff,
       severity: opts.severity,
       failOn: opts.failOn,
+      noIgnore: opts.ignore === false,
       noColor: opts.color === false,
+      rules,
     });
   });
 
