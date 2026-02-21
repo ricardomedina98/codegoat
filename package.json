@@ -10,7 +10,8 @@
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/cli.js",
-    "lint": "tsc --noEmit"
+    "lint": "tsc --noEmit",
+    "test": "node --import tsx --test test/*.test.ts"
   },
   "keywords": ["code-review", "documentation", "cli", "ai"],
   "license": "MIT",
@@ -18,10 +19,12 @@
     "node": ">=18"
   },
   "dependencies": {
-    "commander": "^13.0.0"
+    "commander": "^13.0.0",
+    "ignore": "^7.0.0"
   },
   "devDependencies": {
     "typescript": "^5.7.0",
-    "@types/node": "^22.0.0"
+    "@types/node": "^22.0.0",
+    "tsx": "^4.0.0"
   }
 }
