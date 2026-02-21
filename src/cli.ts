@@ -4,6 +4,7 @@ import fs from "node:fs";
 import { Command } from "commander";
 import { runReview } from "./commands/review.js";
 import { runWatch } from "./commands/watch.js";
+import { runFix } from "./commands/fix.js";
 import { clearCache, getCacheStatus } from "./cache/cache.js";
 import { runDocs } from "./commands/docs.js";
 import { loadConfig, applyConfig, generateStarterConfig } from "./config.js";
@@ -93,6 +94,34 @@ program
       model: opts.model,
       budget: opts.budget ? parseInt(opts.budget, 10) : undefined,
       level,
+    });
+  });
+
+program
+  .command("fix")
+  .description("Review and auto-fix issues in the given path")
+  .argument("<path>", "path to fix")
+  .option("-p, --provider <name>", "LLM provider")
+  .option("-m, --model <name>", "model name")
+  .option("-b, --budget <tokens>", "max token budget")
+  .option("-s, --severity <level>", "minimum severity to fix", "warning")
+  .option("--apply", "auto-apply all fixes without prompting")
+  .option("--dry-run", "preview fixes without writing")
+  .option("-f, --format <type>", "output format: markdown or json")
+  .option("--no-ignore", "skip .codegoatignore")
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; severity?: string; apply?: boolean; dryRun?: boolean; format?: string; ignore?: boolean }) => {
+    applyConfig(opts, config);
+    const rules = config.rules?.filter((r: string) => !r.startsWith("//"));
+    await runFix(path, {
+      provider: opts.provider,
+      model: opts.model,
+      budget: opts.budget ? parseInt(opts.budget, 10) : undefined,
+      severity: opts.severity,
+      apply: opts.apply,
+      dryRun: opts.dryRun,
+      format: (opts.format === "json" ? "json" : "markdown") as "markdown" | "json",
+      noIgnore: opts.ignore === false,
+      rules,
     });
   });
 
