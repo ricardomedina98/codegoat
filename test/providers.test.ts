@@ -107,7 +107,7 @@ describe("createProvider", () => {
         message: "process.exit called",
       });
       assert.equal(exitMock.mock.calls.length, 1);
-      assert.equal(exitMock.mock.calls[0].arguments[0], 1);
+      assert.equal(exitMock.mock.calls[0].arguments[0], 2);
     } finally {
       process.exit = originalExit;
     }

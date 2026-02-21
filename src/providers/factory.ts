@@ -13,10 +13,10 @@ export function createProvider(name?: string): LLMProvider {
 
   if (!process.env.CODEGOAT_API_KEY) {
     console.error(
-      "Error: CODEGOAT_API_KEY is not set.\n" +
+      "❌ CODEGOAT_API_KEY is not set.\n" +
         "Set it with: export CODEGOAT_API_KEY=<your-api-key>"
     );
-    process.exit(1);
+    process.exit(2);
   }
 
   switch (providerName) {

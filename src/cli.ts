@@ -7,6 +7,7 @@ import { runWatch } from "./commands/watch.js";
 import { clearCache, getCacheStatus } from "./cache/cache.js";
 import { runDocs } from "./commands/docs.js";
 import { loadConfig, applyConfig, generateStarterConfig } from "./config.js";
+import { setVerbose, setQuiet, error, info, debug, classifyError, EXIT_CONFIG_ERROR } from "./output/logger.js";
 
 const config = loadConfig();
 
@@ -15,7 +16,14 @@ const program = new Command();
 program
   .name("codegoat")
   .description("AI-powered code review and documentation generator")
-  .version("0.7.0");
+  .version("0.7.0")
+  .option("-v, --verbose", "enable debug logging")
+  .option("-q, --quiet", "suppress all output except findings and errors")
+  .hook("preAction", () => {
+    const opts = program.opts();
+    if (opts.verbose) setVerbose(true);
+    if (opts.quiet) setQuiet(true);
+  });
 
 program
   .command("review")
