@@ -2,6 +2,7 @@
 
 import { Command } from "commander";
 import { runReview } from "./commands/review.js";
+import { runDocs } from "./commands/docs.js";
 
 const program = new Command();
 
@@ -33,9 +34,20 @@ program
   .command("docs")
   .description("Generate documentation for the given path")
   .argument("<path>", "path to document")
-  .action((path: string) => {
-    console.log(`codegoat docs: not implemented yet (path: ${path})`);
-    process.exit(0);
+  .option("-p, --provider <name>", "LLM provider (default: openai)")
+  .option("-m, --model <name>", "model name")
+  .option("-b, --budget <tokens>", "max token budget")
+  .option("-l, --level <level>", "doc level: project, file, or function", "project")
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; level?: string }) => {
+    const level = (["project", "file", "function"].includes(opts.level ?? "")
+      ? opts.level
+      : "project") as "project" | "file" | "function";
+    await runDocs(path, {
+      provider: opts.provider,
+      model: opts.model,
+      budget: opts.budget ? parseInt(opts.budget, 10) : undefined,
+      level,
+    });
   });
 
 program.parse();
