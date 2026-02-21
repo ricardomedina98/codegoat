@@ -6,15 +6,40 @@
   "bin": {
     "codegoat": "./dist/cli.js"
   },
+  "files": [
+    "dist/",
+    "LICENSE",
+    "README.md",
+    "CHANGELOG.md"
+  ],
   "scripts": {
     "build": "tsc",
     "dev": "tsc --watch",
     "start": "node dist/cli.js",
     "lint": "tsc --noEmit",
-    "test": "node --import tsx --test test/*.test.ts"
+    "test": "node --import tsx --test test/*.test.ts",
+    "prepublishOnly": "npm run build"
   },
-  "keywords": ["code-review", "documentation", "cli", "ai"],
+  "keywords": [
+    "code-review",
+    "documentation",
+    "cli",
+    "ai",
+    "llm",
+    "openai",
+    "developer-tools",
+    "static-analysis"
+  ],
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/opengoat/codegoat.git"
+  },
+  "homepage": "https://github.com/opengoat/codegoat#readme",
+  "bugs": {
+    "url": "https://github.com/opengoat/codegoat/issues"
+  },
+  "author": "OpenGoat",
   "engines": {
     "node": ">=18"
   },
