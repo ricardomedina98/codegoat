@@ -266,7 +266,7 @@ export async function runTest(targetPath: string, opts: TestOptions): Promise<vo
   const resolved = path.resolve(targetPath);
 
   // Discover source files (exclude test files)
-  const files = discoverFiles(resolved, { noIgnore: opts.noIgnore });
+  const files = await discoverFiles(resolved, { noIgnore: opts.noIgnore });
   const sourceFiles = files.filter(f => !isTestFile(f.path));
 
   if (sourceFiles.length === 0) {
@@ -274,7 +274,7 @@ export async function runTest(targetPath: string, opts: TestOptions): Promise<vo
     return;
   }
 
-  const budgeted = budgetFiles(sourceFiles, opts.budget ?? 100_000);
+  const { included: budgeted } = budgetFiles(sourceFiles, opts.budget ?? 100_000);
   info(`Generating tests for ${budgeted.length} file${budgeted.length !== 1 ? "s" : ""}...`);
 
   // Group by extension for framework detection

@@ -73,7 +73,7 @@ export async function runReview(
 
   console.error("");
 
-  const rootPath = require("node:path").resolve(targetPath);
+  const rootPath = (await import("node:path")).resolve(targetPath);
 
   // Cache check (skip for --no-cache)
   if (!options.noCache) {

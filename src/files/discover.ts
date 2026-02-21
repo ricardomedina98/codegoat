@@ -120,6 +120,17 @@ export async function discoverFiles(
   options?: DiscoverOptions
 ): Promise<DiscoveredFile[]> {
   const resolvedRoot = path.resolve(rootPath);
+
+  // Handle single file path
+  const stat = fs.statSync(resolvedRoot);
+  if (stat.isFile()) {
+    const ext = path.extname(resolvedRoot);
+    if (!SUPPORTED_EXTENSIONS.has(ext)) return [];
+    const content = fs.readFileSync(resolvedRoot, "utf-8");
+    if (stat.size > MAX_FILE_SIZE) return [];
+    return [{ path: path.basename(resolvedRoot), content, sizeBytes: stat.size }];
+  }
+
   let ig = loadGitignore(resolvedRoot, ignore());
   if (!options?.noIgnore) {
     ig = loadCodegoatIgnore(resolvedRoot, ig);

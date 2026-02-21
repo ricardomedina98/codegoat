@@ -1,5 +1,36 @@
 # Changelog
 
+## [1.5.0] - 2026-02-21
+
+### Added
+
+- **Azure OpenAI provider** — Enterprise managed LLM endpoint
+  - `CODEGOAT_PROVIDER=azure` with `AZURE_OPENAI_ENDPOINT` + `AZURE_OPENAI_KEY`
+  - Deployment-based routing, SSE streaming (OpenAI-compatible API)
+  - Configurable API version via `AZURE_OPENAI_API_VERSION`
+
+- **AWS Bedrock provider** — Serverless LLM via AWS
+  - `CODEGOAT_PROVIDER=bedrock` with standard AWS credential chain
+  - Native fetch + AWS Signature V4 (zero SDK dependency)
+  - Supports Anthropic Claude models and generic Bedrock models
+  - Streaming via InvokeModelWithResponseStream
+
+- **Kotlin, Swift, and Scala language support** — 14 languages total
+  - Kotlin (.kt) with JUnit5/Kotest, KDoc
+  - Swift (.swift) with XCTest, Swift doc comments
+  - Scala (.scala) with ScalaTest/MUnit, Scaladoc
+
+- **SARIF output format** — `--format sarif` for security tool integration
+  - Valid SARIF 2.1.0 JSON output
+  - GitHub Code Scanning upload via `upload-sarif: true` in GitHub Action
+  - Compatible with VS Code SARIF Viewer, Azure DevOps
+
+### Stats
+- 237 tests, all passing
+- 14 languages, 25+ test frameworks
+- 6 LLM providers (OpenAI, Anthropic, Gemini, Ollama, Azure OpenAI, AWS Bedrock)
+- 3 output formats (markdown, JSON, SARIF)
+
 ## [1.4.0] - 2026-02-21
 
 ### Added
