@@ -166,6 +166,14 @@ program
   });
 
 program
+  .command("lsp")
+  .description("Start the Language Server Protocol server (stdio transport)")
+  .action(async () => {
+    const { startServer } = await import("./lsp/server.js");
+    startServer();
+  });
+
+program
   .command("init")
   .description("Generate a starter .codegoatrc config file")
   .action(() => {
