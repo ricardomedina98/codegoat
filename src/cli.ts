@@ -14,14 +14,18 @@ program
   .command("review")
   .description("Review code in the given path")
   .argument("<path>", "path to review")
-  .option("-p, --provider <name>", "LLM provider (default: openai)", undefined)
-  .option("-m, --model <name>", "model name", undefined)
-  .option("-b, --budget <tokens>", "max token budget", undefined)
-  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string }) => {
+  .option("-p, --provider <name>", "LLM provider (default: openai)")
+  .option("-m, --model <name>", "model name")
+  .option("-b, --budget <tokens>", "max token budget")
+  .option("-f, --format <type>", "output format: markdown or json", "markdown")
+  .option("--no-color", "disable color output")
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; color?: boolean }) => {
     await runReview(path, {
       provider: opts.provider,
       model: opts.model,
       budget: opts.budget ? parseInt(opts.budget, 10) : undefined,
+      format: (opts.format === "json" ? "json" : "markdown") as "markdown" | "json",
+      noColor: opts.color === false,
     });
   });
 
