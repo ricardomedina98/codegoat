@@ -1,0 +1,76 @@
+{
+  "name": "codegoat",
+  "displayName": "codegoat — AI Code Review",
+  "description": "AI-powered code review directly in VS Code. Powered by the codegoat CLI.",
+  "version": "1.0.0",
+  "publisher": "opengoat",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ricardomedina98/codegoat"
+  },
+  "engines": {
+    "vscode": "^1.80.0"
+  },
+  "categories": ["Linters", "Other"],
+  "keywords": ["code review", "AI", "lint", "openai", "anthropic", "gemini", "ollama"],
+  "icon": "icon.png",
+  "activationEvents": [],
+  "main": "./out/extension.js",
+  "contributes": {
+    "commands": [
+      {
+        "command": "codegoat.reviewFile",
+        "title": "Codegoat: Review Current File"
+      },
+      {
+        "command": "codegoat.reviewWorkspace",
+        "title": "Codegoat: Review Workspace"
+      },
+      {
+        "command": "codegoat.clearDiagnostics",
+        "title": "Codegoat: Clear Diagnostics"
+      }
+    ],
+    "configuration": {
+      "title": "codegoat",
+      "properties": {
+        "codegoat.provider": {
+          "type": "string",
+          "default": "openai",
+          "enum": ["openai", "anthropic", "ollama", "gemini"],
+          "description": "LLM provider for code review"
+        },
+        "codegoat.model": {
+          "type": "string",
+          "default": "",
+          "description": "Model name (leave empty for provider default)"
+        },
+        "codegoat.severity": {
+          "type": "string",
+          "default": "info",
+          "enum": ["critical", "warning", "info", "style"],
+          "description": "Minimum severity threshold to show"
+        },
+        "codegoat.reviewOnSave": {
+          "type": "boolean",
+          "default": false,
+          "description": "Automatically review files on save"
+        },
+        "codegoat.cliPath": {
+          "type": "string",
+          "default": "codegoat",
+          "description": "Path to the codegoat CLI binary"
+        }
+      }
+    }
+  },
+  "scripts": {
+    "build": "tsc -p tsconfig.json",
+    "watch": "tsc -watch -p tsconfig.json"
+  },
+  "devDependencies": {
+    "@types/vscode": "^1.80.0",
+    "typescript": "^5.0.0"
+  }
+}
