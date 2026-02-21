@@ -165,6 +165,40 @@ program
     capture.flush();
   });
 
+const hookCmd = program
+  .command("hook")
+  .description("Manage pre-commit hook for automatic code review");
+
+hookCmd
+  .command("install")
+  .description("Install a pre-commit hook that reviews staged changes")
+  .option("--fail-on <level>", "exit non-zero at this severity or above", "warning")
+  .option("-s, --severity <level>", "minimum severity to show", "info")
+  .action(async (opts: { failOn?: string; severity?: string }) => {
+    const { installHook } = await import("./commands/hook.js");
+    const result = installHook({ failOn: opts.failOn, severity: opts.severity });
+    if (result.installed) {
+      console.log(`✅ ${result.message}`);
+    } else {
+      console.error(`❌ ${result.message}`);
+      process.exit(1);
+    }
+  });
+
+hookCmd
+  .command("uninstall")
+  .description("Remove the codegoat pre-commit hook")
+  .action(async () => {
+    const { uninstallHook } = await import("./commands/hook.js");
+    const result = uninstallHook();
+    if (result.removed) {
+      console.log(`✅ ${result.message}`);
+    } else {
+      console.error(`❌ ${result.message}`);
+      process.exit(1);
+    }
+  });
+
 program
   .command("lsp")
   .description("Start the Language Server Protocol server (stdio transport)")
