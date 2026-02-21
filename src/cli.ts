@@ -5,6 +5,7 @@ import { Command } from "commander";
 import { runReview } from "./commands/review.js";
 import { runWatch } from "./commands/watch.js";
 import { runFix } from "./commands/fix.js";
+import { runTest } from "./commands/test.js";
 import { clearCache, getCacheStatus } from "./cache/cache.js";
 import { runDocs } from "./commands/docs.js";
 import { loadConfig, applyConfig, generateStarterConfig } from "./config.js";
@@ -118,6 +119,32 @@ program
       budget: opts.budget ? parseInt(opts.budget, 10) : undefined,
       severity: opts.severity,
       apply: opts.apply,
+      dryRun: opts.dryRun,
+      format: (opts.format === "json" ? "json" : "markdown") as "markdown" | "json",
+      noIgnore: opts.ignore === false,
+      rules,
+    });
+  });
+
+program
+  .command("test")
+  .description("Generate unit tests for source files using AI")
+  .argument("<path>", "path to generate tests for")
+  .option("-p, --provider <name>", "LLM provider")
+  .option("-m, --model <name>", "model name")
+  .option("-b, --budget <tokens>", "max token budget")
+  .option("--framework <name>", "test framework override (jest, vitest, mocha, node, pytest, rspec, junit5, go-test, cargo-test)")
+  .option("--dry-run", "preview generated tests without writing")
+  .option("-f, --format <type>", "output format: markdown or json")
+  .option("--no-ignore", "skip .codegoatignore")
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; framework?: string; dryRun?: boolean; format?: string; ignore?: boolean }) => {
+    applyConfig(opts, config);
+    const rules = config.rules?.filter((r: string) => !r.startsWith("//"));
+    await runTest(path, {
+      provider: opts.provider,
+      model: opts.model,
+      budget: opts.budget ? parseInt(opts.budget, 10) : undefined,
+      framework: opts.framework,
       dryRun: opts.dryRun,
       format: (opts.format === "json" ? "json" : "markdown") as "markdown" | "json",
       noIgnore: opts.ignore === false,
