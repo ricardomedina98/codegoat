@@ -33,8 +33,9 @@ program
   .option("--no-cache", "skip review cache")
   .option("--comment-mode <mode>", "PR comment mode: inline, summary, or log (default: inline in PR context)")
   .option("--comment-severity <level>", "minimum severity for inline PR comments (default: warning)")
+  .option("--ci-platform <platform>", "CI platform override: github, gitlab (auto-detected by default)")
   .option("--no-color", "disable color output")
-  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; ignore?: boolean; watch?: boolean; cache?: boolean; commentMode?: string; commentSeverity?: string; color?: boolean }) => {
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; ignore?: boolean; watch?: boolean; cache?: boolean; commentMode?: string; commentSeverity?: string; ciPlatform?: string; color?: boolean }) => {
     applyConfig(opts, config);
     const rules = config.rules?.filter((r: string) => !r.startsWith("//"));
     if (opts.watch) {
@@ -61,6 +62,7 @@ program
       noColor: opts.color === false,
       commentMode: (opts.commentMode as any) ?? undefined,
       commentSeverity: opts.commentSeverity,
+      ciPlatform: opts.ciPlatform,
       rules,
     });
   });

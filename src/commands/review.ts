@@ -12,6 +12,8 @@ import {
 } from "../output/severity.js";
 import { cacheKey, getCached, setCached, ensureCacheDir, type CacheConfig } from "../cache/cache.js";
 import { detectPRContext, postPRReview } from "../github/pr-review.js";
+import { detectCIContext, detectCIPlatform, type CIContext } from "../ci/adapter.js";
+import { gitlabAdapter } from "../ci/gitlab.js";
 
 const CODEGOAT_VERSION = "0.6.0";
 
@@ -31,6 +33,7 @@ export interface ReviewOptions {
   rules?: string[];
   commentMode?: CommentMode;
   commentSeverity?: string;
+  ciPlatform?: string;
 }
 
 export async function runReview(
@@ -219,21 +222,30 @@ async function handleOutput(
     console.error(`\n📊 ${result.filesScanned} files reviewed · ${parts.join(" · ") || "no findings"}${hiddenNote}`);
   }
 
-  // PR inline comments
-  const commentMode = options.commentMode ?? (detectPRContext() ? "inline" : "log");
-  if (commentMode === "inline" && parsed.findings.length > 0) {
-    const prCtx = detectPRContext();
-    if (prCtx) {
-      try {
-        const commentSev = severityFromString(options.commentSeverity ?? "warning");
-        const result = await postPRReview(prCtx, parsed.findings, {
-          commentSeverity: commentSev,
-          failOn,
-        });
-        console.error(`\n💬 Posted PR review: ${result.posted} inline comment(s), ${result.summary} in summary`);
-      } catch (err) {
-        console.error(`\n⚠️ Failed to post PR review: ${err instanceof Error ? err.message : String(err)}`);
+  // CI inline comments (GitHub PR / GitLab MR)
+  const ciCtx = detectCIContext(options.ciPlatform);
+  const commentMode = options.commentMode ?? (ciCtx ? "inline" : "log");
+  if (commentMode === "inline" && parsed.findings.length > 0 && ciCtx) {
+    try {
+      const commentSev = severityFromString(options.commentSeverity ?? "warning");
+      let result: { posted: number; summary: number };
+
+      if (ciCtx.platform === "gitlab") {
+        result = await gitlabAdapter.postReview(ciCtx, parsed.findings, { commentSeverity: commentSev, failOn });
+      } else {
+        // GitHub — use existing direct implementation
+        const prCtx = detectPRContext();
+        if (prCtx) {
+          result = await postPRReview(prCtx, parsed.findings, { commentSeverity: commentSev, failOn });
+        } else {
+          result = { posted: 0, summary: parsed.findings.length };
+        }
       }
+
+      const platformName = ciCtx.platform === "gitlab" ? "MR" : "PR";
+      console.error(`\n💬 Posted ${platformName} review: ${result.posted} inline comment(s), ${result.summary} in summary`);
+    } catch (err) {
+      console.error(`\n⚠️ Failed to post CI review: ${err instanceof Error ? err.message : String(err)}`);
     }
   }
 
