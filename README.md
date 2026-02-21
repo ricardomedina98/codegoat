@@ -271,6 +271,9 @@ The action auto-uses `--diff` mode on PRs for faster, cheaper, more focused revi
 - **TypeScript / JavaScript:** `.ts`, `.tsx`, `.js`, `.jsx`, `.mjs`, `.cjs`
 - **Python:** `.py`
 - **Go:** `.go`
+- **Ruby:** `.rb`
+- **Java:** `.java`
+- **Rust:** `.rs`
 
 More coming based on demand — [open an issue](../../issues) to request yours.
 

@@ -17,6 +17,9 @@ const SUPPORTED_EXTENSIONS = new Set([
   ".cjs",
   ".py",
   ".go",
+  ".rb",
+  ".java",
+  ".rs",
 ]);
 
 const SKIP_DIRS = new Set(["node_modules", "dist", ".git"]);
