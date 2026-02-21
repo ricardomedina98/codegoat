@@ -1,5 +1,23 @@
 # Changelog
 
+## [0.7.0] - 2026-02-21
+
+### Added
+
+- **Ruby (.rb), Java (.java), Rust (.rs) language support** — 8 languages total
+  - Docs command: YARD (Ruby), Javadoc (Java), rustdoc (Rust)
+
+- **GitLab CI integration** — inline MR comments via Discussions API
+  - Auto-detects GitLab CI via `GITLAB_CI` env var
+  - Auth: `GITLAB_TOKEN` or `CI_JOB_TOKEN` (default in GitLab CI)
+  - Self-hosted GitLab support via `CI_API_V4_URL`
+  - `--ci-platform` flag for manual override
+  - `.gitlab-ci.yml` template in docs
+
+- **CI adapter abstraction** — `CIAdapter` interface for multi-platform support
+  - Shared diff parsing + finding mapping across GitHub and GitLab
+  - Bitbucket-ready architecture
+
 ## [0.6.0] - 2026-02-21
 
 ### Added

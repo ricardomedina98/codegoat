@@ -15,7 +15,7 @@ import { detectPRContext, postPRReview } from "../github/pr-review.js";
 import { detectCIContext, detectCIPlatform, type CIContext } from "../ci/adapter.js";
 import { gitlabAdapter } from "../ci/gitlab.js";
 
-const CODEGOAT_VERSION = "0.6.0";
+const CODEGOAT_VERSION = "0.7.0";
 
 export type CommentMode = "inline" | "summary" | "log";
 
