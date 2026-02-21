@@ -39,12 +39,34 @@ npx codegoat review . --model gpt-4o
 | `-f, --format <type>` | Output format: `markdown` or `json` | `markdown` |
 | `--no-color` | Disable color output | auto-detect |
 
+## Providers
+
+### OpenAI (default)
+
+```bash
+export CODEGOAT_API_KEY=sk-...
+codegoat review .
+```
+
+### Anthropic Claude
+
+```bash
+export CODEGOAT_API_KEY=sk-ant-...
+export CODEGOAT_PROVIDER=anthropic
+codegoat review .
+
+# Or use the --provider flag
+codegoat review . --provider anthropic
+```
+
+Default model: `claude-3-haiku-20240307` (fast and cheap). Override with `--model claude-sonnet-4-20250514`.
+
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
 | `CODEGOAT_API_KEY` | **Required.** Your LLM provider API key |
-| `CODEGOAT_PROVIDER` | LLM provider (`openai`) |
+| `CODEGOAT_PROVIDER` | LLM provider (`openai`, `anthropic`) |
 | `CODEGOAT_MODEL` | Model name |
 | `CODEGOAT_MAX_TOKENS` | Token budget for file content |
 | `NO_COLOR` | Disable color output (any value) |

@@ -1,5 +1,6 @@
 import type { LLMProvider } from "./types.js";
 import { OpenAIProvider } from "./openai.js";
+import { AnthropicProvider } from "./anthropic.js";
 
 export function createProvider(name?: string): LLMProvider {
   const providerName = name ?? process.env.CODEGOAT_PROVIDER ?? "openai";
@@ -15,9 +16,11 @@ export function createProvider(name?: string): LLMProvider {
   switch (providerName) {
     case "openai":
       return new OpenAIProvider();
+    case "anthropic":
+      return new AnthropicProvider();
     default:
       throw new Error(
-        `Unknown provider "${providerName}". Supported providers: openai`
+        `Unknown provider "${providerName}". Supported providers: openai, anthropic`
       );
   }
 }
