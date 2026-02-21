@@ -61,12 +61,32 @@ codegoat review . --provider anthropic
 
 Default model: `claude-3-haiku-20240307` (fast and cheap). Override with `--model claude-sonnet-4-20250514`.
 
+### Ollama (local, free)
+
+```bash
+# Install Ollama: https://ollama.ai
+# Pull a model
+ollama pull codellama
+
+# No API key needed!
+codegoat review . --provider ollama
+
+# Custom model
+codegoat review . --provider ollama --model deepseek-coder
+
+# Custom Ollama URL (default: http://localhost:11434)
+CODEGOAT_OLLAMA_URL=http://192.168.1.100:11434 codegoat review . --provider ollama
+```
+
+Default model: `codellama`. Works with any model Ollama supports.
+
 ## Environment Variables
 
 | Variable | Description |
 |----------|-------------|
 | `CODEGOAT_API_KEY` | **Required.** Your LLM provider API key |
-| `CODEGOAT_PROVIDER` | LLM provider (`openai`, `anthropic`) |
+| `CODEGOAT_PROVIDER` | LLM provider (`openai`, `anthropic`, `ollama`) |
+| `CODEGOAT_OLLAMA_URL` | Ollama endpoint (default: `http://localhost:11434`) |
 | `CODEGOAT_MODEL` | Model name |
 | `CODEGOAT_MAX_TOKENS` | Token budget for file content |
 | `NO_COLOR` | Disable color output (any value) |

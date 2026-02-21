@@ -1,9 +1,15 @@
 import type { LLMProvider } from "./types.js";
 import { OpenAIProvider } from "./openai.js";
 import { AnthropicProvider } from "./anthropic.js";
+import { OllamaProvider } from "./ollama.js";
 
 export function createProvider(name?: string): LLMProvider {
   const providerName = name ?? process.env.CODEGOAT_PROVIDER ?? "openai";
+
+  // Ollama doesn't need an API key
+  if (providerName === "ollama") {
+    return new OllamaProvider();
+  }
 
   if (!process.env.CODEGOAT_API_KEY) {
     console.error(
@@ -20,7 +26,7 @@ export function createProvider(name?: string): LLMProvider {
       return new AnthropicProvider();
     default:
       throw new Error(
-        `Unknown provider "${providerName}". Supported providers: openai, anthropic`
+        `Unknown provider "${providerName}". Supported providers: openai, anthropic, ollama`
       );
   }
 }
