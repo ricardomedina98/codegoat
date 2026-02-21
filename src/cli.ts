@@ -6,6 +6,7 @@ import { runReview } from "./commands/review.js";
 import { runWatch } from "./commands/watch.js";
 import { runFix } from "./commands/fix.js";
 import { runTest } from "./commands/test.js";
+import { captureOutput } from "./output/writer.js";
 import { clearCache, getCacheStatus } from "./cache/cache.js";
 import { runDocs } from "./commands/docs.js";
 import { loadConfig, applyConfig, generateStarterConfig } from "./config.js";
@@ -45,8 +46,10 @@ program
   .option("--comment-severity <level>", "minimum severity for inline PR comments (default: warning)")
   .option("--ci-platform <platform>", "CI platform override: github, gitlab (auto-detected by default)")
   .option("--no-color", "disable color output")
-  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; ignore?: boolean; watch?: boolean; cache?: boolean; commentMode?: string; commentSeverity?: string; ciPlatform?: string; color?: boolean }) => {
+  .option("-o, --output <path>", "write output to file instead of stdout")
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; ignore?: boolean; watch?: boolean; cache?: boolean; commentMode?: string; commentSeverity?: string; ciPlatform?: string; color?: boolean; output?: string }) => {
     applyConfig(opts, config);
+    const capture = captureOutput(opts.output);
     const rules = config.rules?.filter((r: string) => !r.startsWith("//"));
     if (opts.watch) {
       await runWatch(path, {
@@ -75,6 +78,7 @@ program
       ciPlatform: opts.ciPlatform,
       rules,
     });
+    capture.flush();
   });
 
 program
@@ -85,8 +89,10 @@ program
   .option("-m, --model <name>", "model name")
   .option("-b, --budget <tokens>", "max token budget")
   .option("-l, --level <level>", "doc level: project, file, or function", "project")
-  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; level?: string }) => {
+  .option("-o, --output <path>", "write output to file instead of stdout")
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; level?: string; output?: string }) => {
     applyConfig(opts, config);
+    const capture = captureOutput(opts.output);
     const level = (["project", "file", "function"].includes(opts.level ?? "")
       ? opts.level
       : "project") as "project" | "file" | "function";
@@ -96,6 +102,7 @@ program
       budget: opts.budget ? parseInt(opts.budget, 10) : undefined,
       level,
     });
+    capture.flush();
   });
 
 program
@@ -110,8 +117,10 @@ program
   .option("--dry-run", "preview fixes without writing")
   .option("-f, --format <type>", "output format: markdown or json")
   .option("--no-ignore", "skip .codegoatignore")
-  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; severity?: string; apply?: boolean; dryRun?: boolean; format?: string; ignore?: boolean }) => {
+  .option("-o, --output <path>", "write output to file instead of stdout")
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; severity?: string; apply?: boolean; dryRun?: boolean; format?: string; ignore?: boolean; output?: string }) => {
     applyConfig(opts, config);
+    const capture = captureOutput(opts.output);
     const rules = config.rules?.filter((r: string) => !r.startsWith("//"));
     await runFix(path, {
       provider: opts.provider,
@@ -124,6 +133,7 @@ program
       noIgnore: opts.ignore === false,
       rules,
     });
+    capture.flush();
   });
 
 program
@@ -137,8 +147,10 @@ program
   .option("--dry-run", "preview generated tests without writing")
   .option("-f, --format <type>", "output format: markdown or json")
   .option("--no-ignore", "skip .codegoatignore")
-  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; framework?: string; dryRun?: boolean; format?: string; ignore?: boolean }) => {
+  .option("-o, --output <path>", "write output to file instead of stdout")
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; framework?: string; dryRun?: boolean; format?: string; ignore?: boolean; output?: string }) => {
     applyConfig(opts, config);
+    const capture = captureOutput(opts.output);
     const rules = config.rules?.filter((r: string) => !r.startsWith("//"));
     await runTest(path, {
       provider: opts.provider,
@@ -150,6 +162,7 @@ program
       noIgnore: opts.ignore === false,
       rules,
     });
+    capture.flush();
   });
 
 program
