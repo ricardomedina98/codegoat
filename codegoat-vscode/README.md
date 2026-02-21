@@ -1,65 +1,65 @@
-# 🐐 codegoat for VS Code
+# VS Code Extension README
 
-AI-powered code review directly in your editor. Powered by the [codegoat CLI](https://github.com/ricardomedina98/codegoat).
+## 🐐 codegoat — AI Code Review, Fix & Test
 
-## Features
+AI-powered code quality in your editor. Reviews your code, suggests fixes, and generates tests — powered by the LLM of your choice.
 
-- **Review current file** — Run AI code review on the active file
-- **Review workspace** — Scan the entire project
+### Features
+
 - **Inline diagnostics** — Findings appear as squiggly underlines with severity colors
-- **Gutter icons** — Error (🔴), Warning (🟡), Info (🔵), Hint (⚪)
-- **Status bar** — Shows review status and finding counts
-- **Review on save** — Optional auto-review when you save (off by default)
+- **Quick Fix** — Click 💡 to apply AI-generated fixes directly
+- **Generate tests** — Right-click a file → "Codegoat: Generate Tests"
+- **Review on command** — Command palette: "Codegoat: Review Current File"
+- **Severity filtering** — Choose what severity level to show
 
-## Prerequisites
+### The Workflow
 
-Install the codegoat CLI:
-
-```bash
-npm install -g codegoat
+```
+Review → see diagnostics → Quick Fix → apply fix → Generate Tests
 ```
 
-Set your API key:
+All from your editor. No terminal needed.
 
-```bash
-export CODEGOAT_API_KEY=<your-key>
-```
-
-## Commands
+### Commands
 
 | Command | Description |
 |---------|-------------|
-| `Codegoat: Review Current File` | Review the active file |
-| `Codegoat: Review Workspace` | Review entire workspace |
-| `Codegoat: Clear Diagnostics` | Clear all codegoat findings |
+| `Codegoat: Review Current File` | Run AI review on the active file |
+| `Codegoat: Review Workspace` | Review all supported files |
+| `Codegoat: Review Changed Files` | Review git-modified files |
+| `Codegoat: Fix Current File` | Generate fixes for findings |
+| `Codegoat: Generate Tests` | Generate tests for the active file |
+| `Codegoat: Set API Key` | Configure your LLM API key |
 
-## Settings
+### Severity Levels
+
+| Icon | Level | VS Code mapping |
+|------|-------|----------------|
+| 🔴 | critical | Error (red underline) |
+| 🟡 | warning | Warning (yellow underline) |
+| 🔵 | info | Information (blue underline) |
+| ⚪ | style | Hint (grey dots) |
+
+### Settings
 
 | Setting | Default | Description |
 |---------|---------|-------------|
-| `codegoat.provider` | `openai` | LLM provider (openai, anthropic, ollama, gemini) |
-| `codegoat.model` | `""` | Model name (empty = provider default) |
+| `codegoat.provider` | `openai` | LLM provider |
+| `codegoat.model` | `gpt-4o-mini` | Model name |
 | `codegoat.severity` | `info` | Minimum severity to show |
-| `codegoat.reviewOnSave` | `false` | Auto-review on file save |
-| `codegoat.cliPath` | `codegoat` | Path to CLI binary |
+| `codegoat.reviewOnSave` | `false` | Review when you save |
 
-## How It Works
+### Requirements
 
-The extension is a thin wrapper around the codegoat CLI:
+- [codegoat CLI](https://github.com/opengoat/codegoat) installed (`npm install -g codegoat`)
+- An LLM API key (OpenAI, Anthropic, or Ollama for local)
 
-1. Runs `codegoat review --format json --quiet`
-2. Parses the JSON output (findings with file, line, severity, message)
-3. Maps findings to VS Code Diagnostics
-4. Shows results inline in the editor
+### Privacy
 
-No core logic in the extension — all review intelligence comes from the CLI.
+The extension wraps the codegoat CLI. Your code is sent to your configured LLM provider. With Ollama, nothing leaves your machine. No telemetry, no tracking.
 
-## Development
+### Links
 
-```bash
-cd codegoat-vscode
-npm install
-npm run build
-```
-
-Then press F5 in VS Code to launch the Extension Development Host.
+- [GitHub](https://github.com/opengoat/codegoat)
+- [Documentation](https://github.com/opengoat/codegoat/tree/main/docs)
+- [CLI README](https://github.com/opengoat/codegoat#readme)

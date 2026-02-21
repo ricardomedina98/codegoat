@@ -4,10 +4,13 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![GitHub stars](https://img.shields.io/github/stars/opengoat/codegoat.svg)](https://github.com/opengoat/codegoat/stargazers)
 
-**AI-powered code review from your terminal.** Free, open source, runs locally.
+**One CLI that reviews, fixes, tests, and documents your code.** Free, open source, runs locally.
 
 ```bash
-npx codegoat review .
+codegoat review .     # find bugs and security issues
+codegoat fix .        # generate and apply fixes
+codegoat test .       # generate unit tests
+codegoat docs .       # generate documentation
 ```
 
 No account. No subscription. No sending your code to a third party.
@@ -39,6 +42,36 @@ Every AI code review tool charges $20-30/developer/month and requires your code 
 
 ---
 
+## The Workflow
+
+```
+review → fix → test → docs
+```
+
+```bash
+# 1. Find what's wrong
+$ codegoat review src/auth.ts
+  🔴 Line 42: Timing-unsafe password comparison
+  🔴 Line 8: Hardcoded JWT secret
+
+# 2. Fix it
+$ codegoat fix src/auth.ts
+  ✅ Applied: bcrypt.compare() for password verification
+  ✅ Applied: JWT secret from env var
+
+# 3. Test it
+$ codegoat test src/auth.ts
+  ✅ Generated: 12 test cases (login, register, verifyToken)
+
+# 4. Document it
+$ codegoat docs src/auth.ts
+  ✅ Generated: API documentation
+```
+
+Each command works independently. Use one or all four.
+
+---
+
 ## Quick Start
 
 ```bash
@@ -55,15 +88,18 @@ That's it. No install needed. [More setup options →](docs/quick-start.md)
 
 ## Commands
 
-| Command | Description |
+| Command | What it does |
 |---------|-------------|
-| `codegoat review <path>` | Review code with severity-rated findings |
-| `codegoat review --diff [ref]` | Review only changed files |
-| `codegoat review --watch` | Watch mode — review on save |
+| `codegoat review <path>` | Find bugs, security issues, and improvements |
+| `codegoat fix <path>` | Generate and apply fixes interactively |
+| `codegoat test <path>` | Generate unit tests for untested functions |
 | `codegoat docs <path>` | Generate documentation |
+| `codegoat review --diff [ref]` | Review only changed files |
+| `codegoat review --watch` | Review on save |
+| `codegoat fix --apply` | Auto-apply all fixes |
+| `codegoat test --framework <name>` | Use a specific test framework |
 | `codegoat cache status` | View cache statistics |
-| `codegoat cache clear` | Clear cached reviews |
-| `codegoat init` | Generate `.codegoatrc` config |
+| `codegoat init` | Generate `.codegoatrc` |
 
 ---
 
@@ -255,21 +291,22 @@ Good first contributions:
 ## Roadmap
 
 ### Shipped ✅
-- [x] Full repo + diff review
-- [x] 3 LLM providers (OpenAI, Anthropic, Ollama)
-- [x] 8 languages
-- [x] Severity system + CI fail conditions
-- [x] GitHub Actions + GitLab CI with inline comments
+- [x] Code review with severity levels
+- [x] AI-powered code fixes (interactive + auto-apply)
+- [x] Unit test generation (12 frameworks auto-detected)
 - [x] Documentation generation
+- [x] 4 LLM providers (OpenAI, Anthropic, Gemini, Ollama)
+- [x] 8 languages (JS/TS, Python, Go, Ruby, Java, Rust)
+- [x] GitHub Actions + GitLab CI + Bitbucket Pipelines with inline comments
 - [x] Caching + watch mode
+- [x] Monorepo support (path-scoped configs)
 - [x] Configuration (.codegoatrc, .codegoatignore)
 
 ### Coming next 🔜
-- [ ] Bitbucket Pipelines integration
-- [ ] Monorepo support (path-scoped configs)
-- [ ] Suggested code fixes (GitHub suggestion blocks)
+- [ ] VS Code extension (preview available in `codegoat-vscode/`)
+- [ ] Language Server Protocol (LSP) for universal editor support
+- [ ] Coverage-aware test generation
 - [ ] More languages (C#, PHP, Kotlin, Swift...)
-- [ ] VS Code extension
 
 ---
 
