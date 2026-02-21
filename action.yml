@@ -1,0 +1,81 @@
+name: "codegoat review"
+description: "AI-powered code review — posts review comments on pull requests"
+author: "OpenGoat"
+
+branding:
+  icon: "eye"
+  color: "orange"
+
+inputs:
+  api-key:
+    description: "LLM API key (e.g. OpenAI API key)"
+    required: true
+  provider:
+    description: "LLM provider"
+    required: false
+    default: "openai"
+  model:
+    description: "Model name (e.g. gpt-4o-mini)"
+    required: false
+    default: ""
+  budget:
+    description: "Max token budget for file content"
+    required: false
+    default: "100000"
+  github-token:
+    description: "GitHub token for posting PR comments"
+    required: false
+    default: ${{ github.token }}
+
+runs:
+  using: "composite"
+  steps:
+    - name: Setup Node.js
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20"
+
+    - name: Install codegoat
+      shell: bash
+      run: |
+        cd ${{ github.action_path }}
+        npm ci
+        npm run build
+
+    - name: Run review
+      id: review
+      shell: bash
+      env:
+        CODEGOAT_API_KEY: ${{ inputs.api-key }}
+        CODEGOAT_PROVIDER: ${{ inputs.provider }}
+        CODEGOAT_MODEL: ${{ inputs.model }}
+        NO_COLOR: "1"
+      run: |
+        REVIEW=$(cd ${{ github.workspace }} && node ${{ github.action_path }}/dist/cli.js review . --budget ${{ inputs.budget }} --format markdown 2>/dev/null || true)
+        if [ -z "$REVIEW" ]; then
+          echo "No review output generated"
+          echo "has_review=false" >> "$GITHUB_OUTPUT"
+          exit 0
+        fi
+        # Write to file to handle multi-line output
+        echo "$REVIEW" > /tmp/codegoat-review.md
+        echo "has_review=true" >> "$GITHUB_OUTPUT"
+
+    - name: Post PR comment
+      if: steps.review.outputs.has_review == 'true' && github.event_name == 'pull_request'
+      shell: bash
+      env:
+        GH_TOKEN: ${{ inputs.github-token }}
+      run: |
+        # Delete previous codegoat comment if exists
+        PREVIOUS=$(gh api repos/${{ github.repository }}/issues/${{ github.event.pull_request.number }}/comments \
+          --jq '.[] | select(.body | startswith("## codegoat review")) | .id' 2>/dev/null || true)
+        if [ -n "$PREVIOUS" ]; then
+          for id in $PREVIOUS; do
+            gh api repos/${{ github.repository }}/issues/comments/$id -X DELETE 2>/dev/null || true
+          done
+        fi
+        # Post new comment
+        gh pr comment ${{ github.event.pull_request.number }} \
+          --repo ${{ github.repository }} \
+          --body-file /tmp/codegoat-review.md
