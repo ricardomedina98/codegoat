@@ -16,11 +16,11 @@ describe("buildReviewPrompt", () => {
   it("system message contains reviewer instructions", () => {
     const messages = buildReviewPrompt([{ path: "a.ts", content: "x" }]);
     assert.ok(messages[0].content.includes("senior code reviewer"));
-    assert.ok(messages[0].content.includes("Bug"));
-    assert.ok(messages[0].content.includes("Security"));
-    assert.ok(messages[0].content.includes("Performance"));
-    assert.ok(messages[0].content.includes("Style"));
-    assert.ok(messages[0].content.includes("Clarity"));
+    assert.ok(messages[0].content.includes("critical"));
+    assert.ok(messages[0].content.includes("critical"));
+    assert.ok(messages[0].content.includes("warning"));
+    assert.ok(messages[0].content.includes("style"));
+    assert.ok(messages[0].content.includes("info"));
   });
 
   it("user message contains file path header", () => {

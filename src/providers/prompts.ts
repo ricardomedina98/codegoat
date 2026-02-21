@@ -3,10 +3,14 @@ import type { ChatMessage } from "./types.js";
 // === Review Prompts ===
 
 const REVIEW_SYSTEM_PROMPT =
-  "You are a senior code reviewer. Be direct and specific. " +
-  "Flag real issues, skip praise. Categorize each issue as " +
-  "Bug, Security, Performance, Style, or Clarity. " +
-  "Always reference the file name and line number.";
+  "You are a senior code reviewer. Be direct and specific. Flag real issues, skip praise. " +
+  "Always reference the file name and line number. " +
+  "For each finding, assign exactly one severity level:\n" +
+  "- critical: Bugs that will cause crashes, data loss, or security vulnerabilities in production. Only use for issues that WILL break things.\n" +
+  "- warning: Likely problems — incomplete error handling, missing edge cases, deprecated APIs, potential race conditions.\n" +
+  "- info: Improvement suggestions — better naming, simpler approach, unnecessary complexity.\n" +
+  "- style: Cosmetic — formatting, naming conventions, import order.\n" +
+  "Be conservative with critical. When in doubt between two levels, choose the lower one.";
 
 function addLineNumbers(content: string): string {
   return content
@@ -27,8 +31,9 @@ export function buildReviewPrompt(
     "\n\n" +
     "Review the code above. For each issue found, format as:\n\n" +
     "### <filepath>\n\n" +
-    "- **<Category> (line <N>):** <description>\n\n" +
-    "End with a summary line: '<N> issues found: <breakdown by category>'. " +
+    "- **<Severity> (line <N>):** <description>\n\n" +
+    "Where Severity is one of: critical, warning, info, style.\n" +
+    "End with a summary line: '<N> issues found: <breakdown by severity>'. " +
     "If the code looks good, say so briefly.";
 
   return [
@@ -44,8 +49,13 @@ const DIFF_REVIEW_SYSTEM_PROMPT =
   "Focus on what the changes introduce: new bugs, security risks, missing error handling, regressions. " +
   "Lines marked [changed] are new/modified — focus your review there. " +
   "Lines marked [context] are existing code shown for understanding. " +
-  "Be direct and specific. Categorize each issue as Bug, Security, Performance, Style, or Clarity. " +
-  "Reference file names and line numbers.";
+  "Be direct and specific. Reference file names and line numbers. " +
+  "For each finding, assign exactly one severity level:\n" +
+  "- critical: Bugs that will cause crashes, data loss, or security vulnerabilities. Only for issues that WILL break things.\n" +
+  "- warning: Likely problems — incomplete error handling, missing edge cases, deprecated APIs.\n" +
+  "- info: Improvement suggestions — better naming, simpler approach, unnecessary complexity.\n" +
+  "- style: Cosmetic — formatting, naming conventions, import order.\n" +
+  "Be conservative with critical.";
 
 export function buildDiffReviewPrompt(
   files: Array<{ path: string; content: string; linesAdded: number; linesRemoved: number }>,

@@ -24,8 +24,10 @@ program
   .option("-b, --budget <tokens>", "max token budget")
   .option("-f, --format <type>", "output format: markdown or json")
   .option("-d, --diff [ref]", "review only changed files from git diff (optional: branch or range)")
+  .option("-s, --severity <level>", "minimum severity to show: critical, warning, info, style", "info")
+  .option("--fail-on <level>", "exit 1 if findings at this severity or above (none to disable)", "critical")
   .option("--no-color", "disable color output")
-  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; color?: boolean }) => {
+  .action(async (path: string, opts: { provider?: string; model?: string; budget?: string; format?: string; diff?: boolean | string; severity?: string; failOn?: string; color?: boolean }) => {
     applyConfig(opts, config);
     const format = opts.format ?? config.format ?? "markdown";
     await runReview(path, {
@@ -34,6 +36,8 @@ program
       budget: opts.budget ? parseInt(opts.budget, 10) : undefined,
       format: (format === "json" ? "json" : "markdown") as "markdown" | "json",
       diff: opts.diff,
+      severity: opts.severity,
+      failOn: opts.failOn,
       noColor: opts.color === false,
     });
   });
