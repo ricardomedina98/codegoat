@@ -14,6 +14,7 @@ import { cacheKey, getCached, setCached, ensureCacheDir, type CacheConfig } from
 import { detectPRContext, postPRReview } from "../github/pr-review.js";
 import { detectCIContext, detectCIPlatform, type CIContext } from "../ci/adapter.js";
 import { gitlabAdapter } from "../ci/gitlab.js";
+import { bitbucketAdapter } from "../ci/bitbucket.js";
 
 const CODEGOAT_VERSION = "0.7.0";
 
@@ -232,6 +233,8 @@ async function handleOutput(
 
       if (ciCtx.platform === "gitlab") {
         result = await gitlabAdapter.postReview(ciCtx, parsed.findings, { commentSeverity: commentSev, failOn });
+      } else if (ciCtx.platform === "bitbucket") {
+        result = await bitbucketAdapter.postReview(ciCtx, parsed.findings, { commentSeverity: commentSev, failOn });
       } else {
         // GitHub — use existing direct implementation
         const prCtx = detectPRContext();

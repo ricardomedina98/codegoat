@@ -40,8 +40,9 @@ export interface CIAdapter {
 /**
  * Auto-detect CI platform from environment variables.
  */
-export function detectCIPlatform(): "github" | "gitlab" | null {
+export function detectCIPlatform(): "github" | "gitlab" | "bitbucket" | null {
   if (process.env.GITLAB_CI) return "gitlab";
+  if (process.env.BITBUCKET_PIPELINE_UUID) return "bitbucket";
   if (process.env.GITHUB_ACTIONS) return "github";
   return null;
 }
@@ -88,6 +89,24 @@ export function detectCIContext(override?: string): CIContext | null {
       mergeRequestId: parseInt(mrIid, 10),
       commitSha,
       apiUrl,
+    };
+  }
+
+  if (platform === "bitbucket") {
+    const token = process.env.BITBUCKET_TOKEN;
+    const workspace = process.env.BITBUCKET_WORKSPACE;
+    const repoSlug = process.env.BITBUCKET_REPO_SLUG;
+    const prId = process.env.BITBUCKET_PR_ID;
+    const commitSha = process.env.BITBUCKET_COMMIT;
+
+    if (!token || !workspace || !repoSlug || !prId || !commitSha) return null;
+
+    return {
+      platform: "bitbucket",
+      token,
+      repo: `${workspace}/${repoSlug}`,
+      mergeRequestId: parseInt(prId, 10),
+      commitSha,
     };
   }
 
