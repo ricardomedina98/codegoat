@@ -41,6 +41,12 @@ export async function runReview(
       console.error(`  - ${f.path}`);
     }
   }
+
+  if (included.length === 0) {
+    console.error("\nNo files fit within the token budget. Try increasing --budget.");
+    process.exit(0);
+  }
+
   console.error("");
 
   // 3. Build prompt and call LLM
