@@ -1,5 +1,22 @@
 # Changelog
 
+## [0.4.0] - 2026-02-21
+
+### Added
+
+- **`.codegoatignore`** — Gitignore-syntax file to exclude files from review
+  - Additive to .gitignore, supports globs and negation patterns
+  - `--no-ignore` flag to skip .codegoatignore
+
+- **Custom review rules** — `rules` array in `.codegoatrc`
+  - Project-specific rules injected into LLM review prompts
+  - Max 20 rules, 200 chars each, with validation
+  - `codegoat init` generates example rules
+
+- **Documentation site content** — Comprehensive guides in `docs/`
+  - Quick start guide, configuration reference, provider setup
+  - CI/CD integration guide, usage examples
+
 ## [0.3.0] - 2026-02-21
 
 ### Added
