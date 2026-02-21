@@ -1,5 +1,41 @@
 # Changelog
 
+## [1.4.0] - 2026-02-21
+
+### Added
+
+- **LSP server** — Universal editor support via Language Server Protocol
+  - `codegoat lsp` starts stdio server for any LSP-compatible editor
+  - Diagnostics on save/open — findings appear as inline squiggles
+  - Severity → DiagnosticSeverity mapping (critical→Error, warning→Warning, info→Info, style→Hint)
+  - Quick Fix code actions for each finding
+  - Configuration via `initializationOptions` (provider, model, severity, reviewOnSave, rules)
+  - Works with Neovim, Helix, Zed, Sublime Text, Emacs, and VS Code
+
+- **Pre-commit hook integration** — Catch issues before they hit CI
+  - `codegoat hook install` — adds pre-commit hook reviewing staged changes
+  - `codegoat hook uninstall` — safely removes codegoat hook
+  - Fast path: skips if no supported source files are staged
+  - Husky-aware: installs to `.husky/` if present
+  - Configurable `--fail-on` and `--severity` flags
+  - Safe: refuses to overwrite non-codegoat hooks
+
+- **`--output` / `-o` flag** — Write results to file instead of stdout
+  - Available on all 4 commands: review, docs, fix, test
+  - Progress/spinner still visible on stderr
+  - Creates parent directories automatically
+  - Works with all format modes (markdown, JSON)
+
+- **C, C++, and PHP language support** — 11 languages total
+  - C (.c, .h) with CUnit/CMocka test frameworks, Doxygen docs
+  - C++ (.cpp, .hpp, .cc) with GTest/Catch2 test frameworks, Doxygen docs
+  - PHP (.php) with PHPUnit/Pest test frameworks, PHPDoc docs
+
+### Stats
+- 229 tests, all passing
+- 11 languages, 20+ test frameworks supported
+- 5 commands: review, fix, test, docs, lsp
+
 ## [1.3.0] - 2026-02-21
 
 ### Added
