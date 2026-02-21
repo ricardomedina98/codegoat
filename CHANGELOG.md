@@ -1,5 +1,26 @@
 # Changelog
 
+## [1.3.0] - 2026-02-21
+
+### Added
+
+- **`codegoat test` command** — AI-powered unit test generation
+  - Auto-detect test framework from project configuration:
+    - **JS/TS**: Vitest, Jest, Mocha, node:test
+    - **Python**: pytest, unittest
+    - **Go**: go test
+    - **Ruby**: RSpec, Minitest
+    - **Java**: JUnit 5, JUnit 4
+    - **Rust**: cargo test (inline `#[cfg(test)]`)
+  - `--framework` flag for explicit override
+  - Smart test file path mapping (e.g. `src/foo.ts → test/foo.test.ts`, Go/Rust alongside source, Java `src/main → src/test` mirror)
+  - Existing test awareness — includes current tests in prompt to avoid duplication
+  - `--dry-run` for preview, `--format json` for tooling integration
+  - Respects `.codegoatignore`, auto-filters existing test files
+  - 20 new tests (203 total)
+
+🐐 **Full CLI suite complete: `review` → `fix` → `test` → `docs`**
+
 ## [1.2.0] - 2026-02-21
 
 ### Added
